@@ -7,18 +7,26 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+//struct ContentView: View {
+//    @EnvironmentObject var gameCenter: GameCenterManager
+//
+//    var body: some View {
+//        Group {
+//            if gameCenter.isAuthenticated {
+//                LobbyView()
+//            } else {
+//                VStack {
+//                    Text("Not signed into Game Center")
+//                }
+//            }
+//        }
+//        .onAppear {
+//            gameCenter.authenticateUser()
+//        }
+//    }
+//}
+
 
 #Preview {
-    ContentView()
+
 }

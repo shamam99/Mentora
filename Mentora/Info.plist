@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app requires local network access to connect with game server.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_socketio._tcp</string>
+	</array>
+</dict>
+</plist>

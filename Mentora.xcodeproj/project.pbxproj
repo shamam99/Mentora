@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		345341882DC687850045C296 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 345341872DC687850045C296 /* SocketIO */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		345341492DC6760B0045C296 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +33,22 @@
 		345341522DC6760B0045C296 /* MentoraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MentoraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3453418A2DC68F460045C296 /* Exceptions for "Mentora" folder in "Mentora" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 345341372DC676080045C296 /* Mentora */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3453413A2DC676080045C296 /* Mentora */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3453418A2DC68F460045C296 /* Exceptions for "Mentora" folder in "Mentora" target */,
+			);
 			path = Mentora;
 			sourceTree = "<group>";
 		};
@@ -52,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				345341882DC687850045C296 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +130,7 @@
 			);
 			name = Mentora;
 			packageProductDependencies = (
+				345341872DC687850045C296 /* SocketIO */,
 			);
 			productName = Mentora;
 			productReference = 345341382DC676080045C296 /* Mentora.app */;
@@ -195,6 +214,9 @@
 			);
 			mainGroup = 3453412F2DC676080045C296;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				345341862DC687850045C296 /* XCRemoteSwiftPackageReference "socket" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 345341392DC676080045C296 /* Products */;
 			projectDirPath = "";
@@ -393,12 +415,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mentora/Mentora.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Mentora/Preview Content\"";
 				DEVELOPMENT_TEAM = L9AS47JH55;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Mentora/Info.plist;
+				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "This app requires local network access to connect with game server.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -422,12 +447,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mentora/Mentora.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Mentora/Preview Content\"";
 				DEVELOPMENT_TEAM = L9AS47JH55;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Mentora/Info.plist;
+				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "This app requires local network access to connect with game server.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -558,6 +586,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		345341862DC687850045C296 /* XCRemoteSwiftPackageReference "socket" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		345341872DC687850045C296 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 345341862DC687850045C296 /* XCRemoteSwiftPackageReference "socket" */;
+			productName = SocketIO;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 345341302DC676080045C296 /* Project object */;
 }
