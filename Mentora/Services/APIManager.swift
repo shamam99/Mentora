@@ -1,3 +1,10 @@
+//
+//  APIManager.swift
+//  Mentora
+//
+//  Created by Shamam Alkafri on 04/05/2025.
+//
+
 import Foundation
 
 class APIManager {

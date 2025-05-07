@@ -1,3 +1,10 @@
+//
+//  GameCenterManager.swift
+//  Mentora
+//
+//  Created by Shamam Alkafri on 04/05/2025.
+//
+
 import Foundation
 import GameKit
 import UIKit
@@ -10,21 +17,29 @@ class GameCenterManager: ObservableObject {
         authenticateUser()
     }
 
-    func authenticateUser() {
+    func authenticateUser(completion: @escaping (Bool) -> Void = { _ in }) {
         GKLocalPlayer.local.authenticateHandler = { viewController, error in
             if let vc = viewController {
                 if let root = UIApplication.shared.windows.first?.rootViewController {
-                    root.present(vc, animated: true, completion: nil)
+                    root.present(vc, animated: true) {
+                        // Wait for UI result
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
+                            completion(self.isAuthenticated)
+                        }
+                    }
                 }
             } else if GKLocalPlayer.local.isAuthenticated {
                 self.isAuthenticated = true
-                print(" Game Center Authenticated")
+                completion(true)
             } else {
                 self.isAuthenticated = false
-                print(" Game Center failed: \(error?.localizedDescription ?? "Unknown error")")
+                print("Game Center error: \(error?.localizedDescription ?? "Unknown error")")
+                completion(false)
             }
         }
     }
+
 
     func getSignaturePayload(completion: @escaping (Result<[String: String], Error>) -> Void) {
         guard isAuthenticated else {

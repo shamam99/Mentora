@@ -1,29 +1,25 @@
+//
+//  AuthView.swift
+//  Mentora
+//
+//  Created by Shamam Alkafri on 05/05/2025.
+//
+
+
 import SwiftUI
 
 struct AuthView: View {
     @StateObject var authVM = AuthViewModel()
     @EnvironmentObject var gameCenterManager: GameCenterManager
     @State private var showSplash = true
+    @State private var authStarted = false
 
     var body: some View {
         NavigationStack {
-            if showSplash {
-                SplashView()
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                            showSplash = false
-
-                            //  Check Game Center
-                            if gameCenterManager.isAuthenticated {
-                                authVM.login()
-                            } else {
-                                authVM.error = "Game Center login failed."
-                            }
-                        }
-                    }
-            } else {
+            Group {
                 if let _ = authVM.user {
                     HomeView()
+                        .environmentObject(authVM)
                 } else if let error = authVM.error {
                     VStack(spacing: 24) {
                         Spacer()
@@ -41,7 +37,28 @@ struct AuthView: View {
                     .padding()
                     .background(Color.black.ignoresSafeArea())
                 } else {
-                    SplashView() 
+                    SplashView()
+                        .onAppear {
+                            startLoginIfNeeded()
+                        }
+                }
+            }
+        }
+    }
+
+    private func startLoginIfNeeded() {
+        guard authVM.user == nil else { return }
+
+        print("[AuthView] Starting Game Center auth...")
+
+        gameCenterManager.authenticateUser { success in
+            DispatchQueue.main.async {
+                if success {
+                    print("[AuthView] Game Center auth succeeded")
+                    authVM.login()
+                } else {
+                    print("[AuthView] Game Center auth failed")
+                    authVM.error = "Game Center login failed."
                 }
             }
         }

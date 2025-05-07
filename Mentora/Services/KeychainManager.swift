@@ -10,6 +10,7 @@ import Security
 
 final class KeychainManager {
     static let shared = KeychainManager()
+    private let key = "lastRefreshDate"
     private let service = "com.mentora.auth"
     private let account = "jwt_token"
 
@@ -28,6 +29,10 @@ final class KeychainManager {
 
         SecItemDelete(query as CFDictionary) // Remove old token if exists
         SecItemAdd(query as CFDictionary, nil)
+    }
+    
+    func saveRefreshDate(_ date: Date = Date()) {
+        UserDefaults.standard.set(date, forKey: key)
     }
 
     // Load token from Keychain
@@ -61,5 +66,14 @@ final class KeychainManager {
         ]
 
         SecItemDelete(query as CFDictionary)
+    }
+    
+    func shouldRefreshToken() -> Bool {
+        guard let lastRefresh = UserDefaults.standard.object(forKey: key) as? Date else {
+            return true // never refreshed before
+        }
+
+        let sixDays: TimeInterval = 6 * 24 * 60 * 60
+        return Date().timeIntervalSince(lastRefresh) >= sixDays
     }
 }
