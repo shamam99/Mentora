@@ -31,7 +31,7 @@ struct HomeView: View {
                         .cornerRadius(12)
                 }
 
-                NavigationLink(destination: JoinRoomView()) {
+                NavigationLink(destination: JoinRoomView().environmentObject(authVM)) {
                     Text(" Join a Room")
                         .font(.headline)
                         .frame(maxWidth: .infinity)

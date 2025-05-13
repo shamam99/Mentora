@@ -11,11 +11,16 @@ import SwiftUI
 @main
 struct MentoraApp: App {
     @StateObject private var gameCenterManager = GameCenterManager.shared
+    @StateObject private var authVM = AuthViewModel()
 
     var body: some Scene {
         WindowGroup {
             AuthView()
                 .environmentObject(gameCenterManager)
+                .environmentObject(authVM)
+                .onAppear {
+                    SocketService.shared.ensureConnected()
+                }
         }
     }
 }

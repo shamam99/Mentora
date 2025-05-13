@@ -16,12 +16,38 @@ final class SocketService {
     private var socket: SocketIOClient
 
     private init() {
-        self.manager = SocketManager(socketURL: URL(string: "http://172.20.10.14:3001")!, config: [.log(true), .compress])
+        self.manager = SocketManager(
+            socketURL: URL(string: "http://192.168.8.153:3001")!,
+            config: [
+                .log(true),
+                .compress,
+                .reconnects(true),
+                .forceNew(true),
+                .connectParams(["platform": "iOS"])
+            ]
+        )
+
         self.socket = manager.defaultSocket
-        socket.connect()
     }
 
+    /// Public accessor
     func getSocket() -> SocketIOClient {
         return socket
+    }
+
+    /// Manual connect trigger (optional fallback)
+    func ensureConnected() {
+        if socket.status != .connected && socket.status != .connecting {
+            print("[SocketService] Manually connecting...")
+            socket.connect()
+        } else {
+            print("[SocketService] Already connected or connecting")
+        }
+    }
+
+    /// Optional: Disconnect safely
+    func disconnect() {
+        socket.disconnect()
+        print("[SocketService] Disconnected")
     }
 }

@@ -8,8 +8,9 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct RoomListView: View {
-    
     @EnvironmentObject var authVM: AuthViewModel
     
     var body: some View {
@@ -21,7 +22,6 @@ struct RoomListView: View {
 
             NavigationLink("Start Solo Game") {
                 SoloGameView(vm: SoloGameViewModel(userId: authVM.user?._id ?? ""))
-                Text(" Start Solo Game")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -30,8 +30,15 @@ struct RoomListView: View {
                     .cornerRadius(12)
             }
 
-            NavigationLink(destination: MultiplayerLobbyView()) {
-                Text(" Create Multiplayer Room")
+            NavigationLink(
+                destination: MultiplayerLobbyView(
+                    userId: authVM.user?._id ?? "",
+                    displayName: authVM.user?.displayName ?? "",
+                    pinCode: nil
+                )
+
+            ) {
+                Text("Create Multiplayer Room")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -46,3 +53,4 @@ struct RoomListView: View {
         .navigationTitle("Rooms")
     }
 }
+
