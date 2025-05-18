@@ -9,6 +9,7 @@
 import Foundation
 
 struct MultiplayerQuestion: Codable {
-    let text: String
+    let question: String
     let choices: [String]
+    let correct: String
 }

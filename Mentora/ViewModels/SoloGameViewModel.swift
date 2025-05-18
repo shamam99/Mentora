@@ -22,7 +22,7 @@ class SoloGameViewModel: ObservableObject {
     init(userId: String) {
         self.userId = userId
 
-        // Live bindings to update view
+        // Bind service updates to view model
         service.$currentQuestion
             .receive(on: RunLoop.main)
             .assign(to: &$question)
@@ -52,5 +52,14 @@ class SoloGameViewModel: ObservableObject {
 
     func submitAnswer(_ answer: String) {
         service.sendAnswer(answer)
+    }
+
+    func resetGame() {
+        service.resetGame()
+        showResult = false
+        finalScore = nil
+        question = nil
+        currentIndex = 0
+        total = 0
     }
 }

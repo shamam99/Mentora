@@ -81,7 +81,7 @@ class AuthViewModel: ObservableObject {
         
         if TokenRefreshManager.shared.shouldRefreshToken() {
             // Call refresh token endpoint
-            guard let url = URL(string: "http://192.168.8.153:3001/auth/refresh-token") else { return }
+            guard let url = URL(string: "http://172.20.10.14:3001/auth/refresh-token") else { return }
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"

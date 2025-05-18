@@ -5,64 +5,136 @@
 //  Created by Shamam Alkafri on 05/05/2025.
 //
 
+
 import SwiftUI
 
 struct MultiplayerLobbyView: View {
     @StateObject private var vm = MultiplayerLobbyViewModel()
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var navigateToGame = false
+    @Environment(\.presentationMode) var presentationMode
 
     let userId: String
     let displayName: String
     let pinCode: String?
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Text("Room PIN: \(vm.pinCode)")
-                    .font(.title2)
-                    .bold()
-                    .padding(.top)
+        ZStack(alignment: .topLeading) {
+            // Background
+            Color(hex: "#FEFAED").ignoresSafeArea()
+            Image("bg").resizable().scaledToFill().ignoresSafeArea()
 
-                Text("Players").font(.headline)
+            VStack {
+                // Back Button
+                HStack {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "arrow.left")
+                            .resizable()
+                            .frame(width: 28, height: 28)
+                            .foregroundColor(.black)
+                            .padding(16)
+                    }
+                    Spacer()
+                }
 
-                ScrollView {
-                    VStack(spacing: 10) {
-                        ForEach(vm.players, id: \.self) { name in
-                            Text(name)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.gray.opacity(0.2))
-                                .cornerRadius(10)
+                Spacer()
+
+                // Player Grid (Puzzle Layout)
+                PuzzleGridView(players: vm.players)
+
+                Spacer()
+
+                // Bottom Row: Room Code + Start Button
+                HStack {
+                    // Room Code
+                    Text("Code : \(vm.pinCode)")
+                        .font(.custom("IBMPlexMono-Bold", size: 20))
+                        .foregroundColor(.black)
+                        .padding(.leading, 40)
+
+                    Spacer()
+
+                    // Host Start Button
+                    if vm.isHost {
+                        Button(action: {
+                            vm.startGame()
+                        }) {
+                            Text("Start room")
+                                .font(.custom("IBMPlexMono-Bold", size: 18))
+                                .foregroundColor(.black)
+                                .frame(width: 160, height: 48)
+                                .background(vm.canStartGame ? Color(hex: "#05D96A") : Color.gray)
+                                .cornerRadius(8)
+                                .shadow(color: .black.opacity(0.25), radius: 2, x: 2, y: 2)
                         }
+                        .padding(.trailing, 40)
+                        .disabled(!vm.canStartGame)
                     }
-                    .padding(.horizontal)
                 }
-
-                if vm.isHost {
-                    Button("Start Game") {
-                        vm.startGame()
-                    }
-                    .disabled(!vm.canStartGame)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(vm.canStartGame ? Color.green : Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                }
-
-                NavigationLink(
-                    destination: MultiplayerGameViewWrapper(gameVM: vm.gameVM),
-                    isActive: $vm.navigateToGame,
-                    label: { EmptyView() }
-                )
-                .hidden()
+                .padding(.bottom, 24)
             }
-            .navigationTitle("Multiplayer Lobby")
-            .onAppear {
-                vm.joinRoom(userId: userId, displayName: displayName, pinCode: pinCode)
+
+            // NavigationLink to MultiplayerGameView
+            NavigationLink(
+                destination: MultiplayerGameViewWrapper(gameVM: vm.gameVM),
+                isActive: $vm.navigateToGame
+            ) {
+                EmptyView()
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            vm.initialize(userId: userId, displayName: displayName, pinCode: pinCode)
+        }
+    }
+}
+
+// MARK: - Puzzle Grid Layout
+struct PuzzleGridView: View {
+    let players: [String]
+    private let playerImages = ["Player1", "Player2", "Player3", "Player4"]
+
+    var body: some View {
+        VStack(spacing: -144) {
+            HStack(spacing: -68) {
+                playerSlot(index: 0)
+                playerSlot(index: 1)
+            }
+            HStack(spacing: -76) {
+                playerSlot(index: 2)
+                playerSlot(index: 3)
             }
         }
     }
+
+    func playerSlot(index: Int) -> some View {
+        let playerJoined = index < players.count
+        let imageName = playerImages[index]
+
+        return ZStack {
+            Image(imageName)
+                .resizable()
+                .frame(width: 370, height: 370)
+                .opacity(playerJoined ? 1 : 0.3)
+                .shadow(color: .black.opacity(playerJoined ? 0 : 0.25), radius: 4, x: 2, y: 2)
+
+            if playerJoined {
+                Text("Player \(index + 1)")
+                    .font(.custom("IBMPlexMono-Bold", size: 22))
+                    .foregroundColor(.black)
+            }
+        }
+    }
+}
+
+#Preview {
+    MultiplayerLobbyView(
+        userId: "dummy-id",
+        displayName: "Tester",
+        pinCode: "123456"
+    )
+    .environmentObject(AuthViewModel())
+    .previewDevice("iPad Pro (11-inch)")
+    .previewInterfaceOrientation(.landscapeLeft)
 }

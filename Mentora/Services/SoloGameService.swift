@@ -5,6 +5,12 @@
 //  Created by Shamam Alkafri on 05/05/2025.
 //
 
+//
+//  SoloGameService.swift
+//  Mentora
+//
+//  Created by Shamam Alkafri on 05/05/2025.
+//
 
 import Foundation
 import SocketIO
@@ -89,12 +95,13 @@ class SoloGameService: ObservableObject {
         }
     }
 
-    private func resetGame() {
+    func resetGame() {
         currentQuestion = nil
         currentIndex = 0
         totalQuestions = 0
         lastAnswerCorrect = nil
         correctAnswer = nil
         finalScore = nil
+        isGameOver = false
     }
 }

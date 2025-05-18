@@ -7,7 +7,9 @@
 
 import Foundation
 
-struct SoloGameQuestion: Codable {
+struct SoloGameQuestion: Identifiable, Equatable {
+    let id = UUID()
     let text: String
     let choices: [String]
 }
+

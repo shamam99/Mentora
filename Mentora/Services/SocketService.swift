@@ -17,7 +17,7 @@ final class SocketService {
 
     private init() {
         self.manager = SocketManager(
-            socketURL: URL(string: "http://192.168.8.153:3001")!,
+            socketURL: URL(string: "http://172.20.10.14:3001")!,
             config: [
                 .log(true),
                 .compress,
