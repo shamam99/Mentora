@@ -12,7 +12,7 @@ class APIService {
     private init() {}
 
     func generateQuestions(from text: String, mode: String = "both", completion: @escaping (Result<[Question], Error>) -> Void) {
-        guard let url = URL(string: "http://172.20.10.14:8000/api/question/generate") else {
+        guard let url = URL(string: "http://192.168.8.153:8000/api/question/generate") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }

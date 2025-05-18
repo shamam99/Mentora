@@ -23,9 +23,14 @@ final class MultiplayerGameViewModel: ObservableObject {
 
     var onAnswerFeedback: ((String, String) -> Void)?
 
-    init(userId: String) {
+    init(userId: String, initialQuestionPayload: [String: Any]? = nil) {
         self.userId = userId
         self.socket = SocketService.shared.getSocket()
+        self.setupListeners()
+
+        if let payload = initialQuestionPayload {
+            self.handleQuestion(payload)
+        }
     }
 
     func submitAnswer(_ answer: String) {
@@ -49,41 +54,8 @@ final class MultiplayerGameViewModel: ObservableObject {
 
         socket.on("multiplayerQuestion") { [weak self] data, _ in
             guard let self = self else { return }
-
-            guard
-                let dict = data.first as? [String: Any],
-                let index = dict["index"] as? Int,
-                let total = dict["total"] as? Int,
-                let questionDict = dict["question"] as? [String: Any],
-                let choices = questionDict["choices"] as? [String],
-                let correct = questionDict["correct"] as? String
-            else {
-                print("[multiplayerQuestion]  Failed to parse question")
-                return
-            }
-
-            let text: String
-            if let t = questionDict["text"] as? String {
-                text = t
-            } else if let q = questionDict["question"] as? String {
-                text = q
-            } else {
-                text = "Untitled"
-            }
-
-            DispatchQueue.main.async {
-                print("[multiplayerQuestion] ✅ Question parsed for Q\(index): \(text)")
-                self.currentIndex = index
-                self.totalQuestions = total
-                self.currentQuestion = MultiplayerQuestion(
-                    question: text,
-                    choices: choices,
-                    correct: correct
-                )
-                self.hasAnsweredCurrentQuestion = false
-            }
+            self.handleQuestion(data.first)
         }
-
 
         socket.on("multiplayerAnswerResult") { [weak self] data, _ in
             guard let self = self,
@@ -116,6 +88,30 @@ final class MultiplayerGameViewModel: ObservableObject {
                 self.isGameOver = true
                 print("🏁 [GameVM] Game over. Scores: \(scores)")
             }
+        }
+    }
+
+    private func handleQuestion(_ raw: Any?) {
+        guard let payload = raw as? [String: Any],
+              let questionDict = payload["question"] as? [String: Any],
+              let choices = questionDict["choices"] as? [String],
+              let correct = questionDict["correct"] as? String,
+              let text = questionDict["text"] as? String,
+              let index = payload["index"] as? Int,
+              let total = payload["total"] as? Int else {
+            print("❌ Failed to parse multiplayerQuestion")
+            return
+        }
+
+        let question = MultiplayerQuestion(question: text, choices: choices, correct: correct)
+
+        DispatchQueue.main.async {
+            self.currentQuestion = question
+            self.currentIndex = index
+            self.totalQuestions = total
+            self.hasAnsweredCurrentQuestion = false
+            self.selectedAnswer = nil
+            print("✅ [GameVM] Question updated in ViewModel at index: \(index)")
         }
     }
 

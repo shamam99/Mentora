@@ -12,6 +12,9 @@ struct MultiplayerLobbyView: View {
     @StateObject private var vm = MultiplayerLobbyViewModel()
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.presentationMode) var presentationMode
+    @State private var isLoadingGame = true
+
+    
 
     let userId: String
     let displayName: String
@@ -27,6 +30,7 @@ struct MultiplayerLobbyView: View {
                 // Back Button
                 HStack {
                     Button(action: {
+                        vm.leaveLobby()
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "arrow.left")
@@ -77,16 +81,36 @@ struct MultiplayerLobbyView: View {
 
             // NavigationLink to MultiplayerGameView
             NavigationLink(
-                destination: MultiplayerGameViewWrapper(gameVM: vm.gameVM),
+                destination: Group {
+                    if let gameVM = vm.gameVM, !isLoadingGame {
+                        MultiplayerGameViewWrapper(vm: gameVM)
+                    } else {
+                        ProgressView("Starting game...")
+                            .font(.custom("IBMPlexMono-Regular", size: 18))
+                            .foregroundColor(.gray)
+                    }
+                },
                 isActive: $vm.navigateToGame
             ) {
                 EmptyView()
             }
+
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
             vm.initialize(userId: userId, displayName: displayName, pinCode: pinCode)
+            vm.loadingCompleteCallback = {
+                isLoadingGame = false
+            }
         }
+        .onDisappear {
+            // Only leave lobby if game hasn't started
+            if !vm.navigateToGame {
+                vm.leaveLobby()
+            }
+        }
+
+
     }
 }
 

@@ -5,6 +5,7 @@
 //  Created by Shamam Alkafri on 07/05/2025.
 //
 
+
 import Foundation
 import SocketIO
 
@@ -13,11 +14,16 @@ final class MultiplayerLobbyViewModel: ObservableObject {
     @Published var players: [String] = []
     @Published var isHost: Bool = false
     @Published var navigateToGame: Bool = false
-    @Published var gameVM: MultiplayerGameViewModel?
+    @Published var gameVM: MultiplayerGameViewModel? = nil
 
     private var userId: String = ""
     private var displayName: String = ""
     private let socket = SocketService.shared.getSocket()
+
+    private var pendingQuestionPayload: [String: Any]? = nil
+
+    /// Called after game starts, used to signal when loading can stop
+    var loadingCompleteCallback: (() -> Void)? = nil
 
     var canStartGame: Bool {
         return isHost && players.count >= 2
@@ -38,6 +44,7 @@ final class MultiplayerLobbyViewModel: ObservableObject {
 
         socket.off("multiplayerLobbyUpdate")
         socket.off("multiplayerGameStarted")
+        socket.off("multiplayerQuestion")
 
         socket.on("multiplayerLobbyUpdate") { [weak self] data, _ in
             guard let self = self,
@@ -45,7 +52,7 @@ final class MultiplayerLobbyViewModel: ObservableObject {
                   let pin = dict["pinCode"] as? String,
                   let names = dict["players"] as? [String],
                   let hostId = dict["hostId"] as? String else {
-                print(" Invalid lobby update data")
+                print("❌ Invalid lobby update data")
                 return
             }
 
@@ -53,16 +60,45 @@ final class MultiplayerLobbyViewModel: ObservableObject {
                 self.pinCode = pin
                 self.players = names
                 self.isHost = (hostId == self.userId)
-                print("Lobby Update → Players: \(names), isHost: \(self.isHost)")
+                print("✅ Lobby Update → Players: \(names), isHost: \(self.isHost)")
+
+                if let roomId = dict["roomId"] as? String {
+                    RoomManager.shared.roomId = roomId
+                    print("🔑 Stored roomId: \(roomId)")
+                }
+            }
+        }
+
+        socket.on("multiplayerQuestion") { [weak self] data, _ in
+            guard let self = self,
+                  let payload = data.first as? [String: Any] else {
+                print("❌ Failed to receive multiplayerQuestion")
+                return
+            }
+
+            if let gameVM = self.gameVM {
+                print("📥 Forwarding first question directly to gameVM")
+                gameVM.setupListeners()
+                gameVM.submitAnswer("") // trigger to ensure setup?
+            } else {
+                print("📦 Caching first multiplayer question payload")
+                self.pendingQuestionPayload = payload
             }
         }
 
         socket.on("multiplayerGameStarted") { [weak self] _, _ in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                print("Received multiplayerGameStarted. Navigating to game.")
-                self.gameVM = MultiplayerGameViewModel(userId: self.userId)
+                print("🚀 Received multiplayerGameStarted. Navigating to game.")
+                self.gameVM = MultiplayerGameViewModel(
+                    userId: self.userId,
+                    initialQuestionPayload: self.pendingQuestionPayload
+                )
                 self.navigateToGame = true
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    self.loadingCompleteCallback?()
+                }
             }
         }
     }
@@ -96,7 +132,7 @@ final class MultiplayerLobbyViewModel: ObservableObject {
     // MARK: - Host Starts Game
     func startGame() {
         guard let roomId = RoomManager.shared.roomId else {
-            print("[LobbyVM] Missing roomId for starting game")
+            print("❗️[LobbyVM] Missing roomId for starting game")
             return
         }
 
@@ -116,5 +152,14 @@ final class MultiplayerLobbyViewModel: ObservableObject {
             print("[LobbyVM] Emitting startMultiplayerGame: \(payload)")
             socket.emit("startMultiplayerGame", payload)
         }
+    }
+
+    // MARK: - Cleanup on Exit
+    func leaveLobby() {
+        print("[LobbyVM] Leaving lobby...")
+        socket.off("multiplayerLobbyUpdate")
+        socket.off("multiplayerGameStarted")
+        socket.off("multiplayerQuestion")
+        socket.emit("leaveMultiplayerGame", ["userId": userId])
     }
 }

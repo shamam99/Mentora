@@ -10,7 +10,7 @@ import Foundation
 class APIManager {
     
     static let shared = APIManager()
-    private let baseURL = "http://172.20.10.14:3001"
+    private let baseURL = "http://192.168.8.153:3001"
 
     func loginWithGameCenter(payload: [String: String], completion: @escaping (Result<(User, String), Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/auth/apple-gamecenter-login") else {
