@@ -10,7 +10,7 @@ import Foundation
 class APIManager {
     
     static let shared = APIManager()
-    private let baseURL = "https://mentorabackend.onrender.com"
+    private let baseURL = "https://mentorabackend.onrender.com" //backend server
 
     func loginWithGameCenter(payload: [String: String], completion: @escaping (Result<(User, String), Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/auth/apple-gamecenter-login") else {
