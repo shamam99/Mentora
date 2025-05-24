@@ -8,40 +8,45 @@
 
 import SwiftUI
 
-struct HomeButton: View {
+struct MentoraShadowButton: View {
     let label: String
     let defaultColor: String
     let pressedColor: String
+    let width: CGFloat
+    let height: CGFloat
+    let fontSize: CGFloat
+    let cornerRadius: CGFloat
     let isPressed: Bool
     let action: () -> Void
 
     var body: some View {
-        ZStack {
-            // Bottom black layer (fake shadow)
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black)
-                .frame(width: 324, height: 306) // slightly taller
+        Button(action: {
+            SoundPlayer.shared.playSound(named: "1")
+            action()
+        }) {
+            ZStack {
+                // Black shadow rectangle
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(Color.black)
+                    .frame(width: width, height: height)
+                    .offset(y: 6)
 
-            // Actual button layer — slightly offset up
-            Button(action:{ SoundPlayer.shared.playSound(named: "1")
-                
-                action()}) {
-                RoundedRectangle(cornerRadius: 10)
+                // Main button
+                RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
-                    .frame(width: 317, height: 276)
+                    .frame(width: width - 5, height: height - 6)
                     .overlay(
                         Text(label)
-                            .font(.custom("IBMPlexMono-Bold", size: 28))
+                            .font(.custom("IBMPlexMono-Bold", size: fontSize))
                             .foregroundColor(.black)
+                            .padding(.horizontal, 12)
+                            .multilineTextAlignment(.center)
                     )
             }
-            .offset(y: -10) // lift up to reveal bottom frame
-            .buttonStyle(.plain)
         }
+        .buttonStyle(.plain)
     }
 }
-
-
 
 
 
@@ -54,27 +59,26 @@ struct HomeBottomButton: View {
     let action: () -> Void
 
     var body: some View {
-        ZStack {
-            // Static black bottom layer
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black)
-                .frame(width: 493, height: 122)
+        Button(action: {
+            SoundPlayer.shared.playSound(named: "1")
+            action()
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.black)
+                    .offset(y: 6)
 
-            // Active button on top — slightly moved up
-            Button(action: { SoundPlayer.shared.playSound(named: "1")
-                
-                action()}) {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
-                    .frame(width: 483, height: 96)
                     .overlay(
                         Text(label)
-                            .font(.custom("IBMPlexMono-SemiBold", size: 28))
+                            .font(.custom("IBMPlexMono-Bold", size: 20))
                             .foregroundColor(.black)
+                            .padding(8)
                     )
             }
-            .offset(y: -10)
-            .buttonStyle(.plain)
+            .frame(width: 320, height: 80)
         }
+        .buttonStyle(.plain)
     }
 }

@@ -31,16 +31,11 @@ struct PDFUploadView: View {
             Image("bg").resizable().scaledToFill().ignoresSafeArea()
 
             //  Back button
-            Button(action: {
-                SoundPlayer.shared.playSound(named: "3")
+            BackExitButton(icon: "chevron.left", topPadding: 30, leftPadding: 62, sound: "3") {
                 presentationMode.wrappedValue.dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.black)
-                    .padding(.top, 30)
             }
+
+
             .padding(.leading, 62)
 
             HStack(alignment: .center) {

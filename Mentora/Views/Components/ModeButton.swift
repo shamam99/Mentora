@@ -5,6 +5,7 @@
 //  Created by Shamam Alkafri on 15/05/2025.
 //
 
+
 import SwiftUI
 
 struct ModeButton: View {
@@ -15,26 +16,27 @@ struct ModeButton: View {
     let action: () -> Void
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black)
-                .frame(width: 324, height: 306)
+        Button(action: {
+            SoundPlayer.shared.playSound(named: "1")
+            action()
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.black)
+                    .offset(y: 8)
 
-            Button(action: {
-                SoundPlayer.shared.playSound(named: "1")
-                action() // call the original action
-            })  {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
-                    .frame(width: 317, height: 276)
                     .overlay(
                         Text(label)
-                            .font(.custom("IBMPlexMono-Bold", size: 28))
+                            .font(.custom("IBMPlexMono-Bold", size: 22))
                             .foregroundColor(.black)
+                            .padding(12)
+                            .multilineTextAlignment(.center)
                     )
             }
-            .offset(y: -10)
-            .buttonStyle(.plain)
+            .frame(width: 310, height: 160)
         }
+        .buttonStyle(.plain)
     }
 }

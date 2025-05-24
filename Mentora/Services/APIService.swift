@@ -11,7 +11,16 @@ class APIService {
     static let shared = APIService()
     private init() {}
 
-    private let openAIKey = "Api KEY"
+    private var openAIKey: String {
+        guard
+            let url = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
+            let data = try? Data(contentsOf: url),
+            let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
+            let key = plist["OpenAIKey"] as? String else {
+                fatalError("❌ OpenAI API Key not found. Make sure Secrets.plist exists and is added to Copy Bundle Resources.")
+        }
+        return key
+    }
 
     func generateQuestions(from text: String, mode: String = "both", completion: @escaping (Result<[Question], Error>) -> Void) {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {

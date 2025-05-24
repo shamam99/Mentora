@@ -22,43 +22,40 @@ struct MultiplayerResultsView: View {
                 .ignoresSafeArea()
 
             VStack {
-                HStack {
-                    Button(action: {
-                        SoundPlayer.shared.playSound(named: "3")
-                        vm.leaveGame()
-                        SocketService.shared.disconnect()
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            NavigationUtil.popToRootView()
+                GeometryReader { geometry in
+                    let screenWidth = geometry.size.width
+                    let totalContentWidth: CGFloat = CGFloat(players.count) * 250 + CGFloat(players.count - 1) * 20
+                    let horizontalPadding = max((screenWidth - totalContentWidth) / 2, 20)
+                    
+                    VStack {
+                        HStack {
+                            BackExitButton(icon: "xmark", topPadding: 30, leftPadding: 60, sound: "3") {
+                                vm.leaveGame()
+                                SocketService.shared.disconnect()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    NavigationUtil.popToRootView()
+                                }
+                            }
+                            Spacer()
                         }
-                    }) {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .frame(width: 40, height: 40)
+                        
+                        Text("We Have A Winner!")
+                            .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            .kerning(2)
                             .foregroundColor(.black)
-                            .padding(.top, 30)
-                            .padding(.leading, 60)
-                    }
-                    Spacer()
-                }
-
-                Text("We Have A Winner!")
-                    .font(.system(size: 40, weight: .bold, design: .monospaced))
-                    .kerning(2)
-                    .foregroundColor(.black)
-                    .padding(.top, 10)
-
-                Spacer()
-
-                HStack(alignment: .bottom, spacing: 20) {
-                    ForEach(players.indices, id: \.self) { index in
-                        let player = players[index]
-                        let isWinner = index == 0
-                        let height = isWinner ? 570 : index == 2 ? 510 : index == 1 ? 380 : 280
+                            .padding(.top, 1)
+                            .padding(.bottom, 80)
+                        
+                        Spacer()
+                        
+                        HStack(alignment: .bottom, spacing: 20) {
+                            ForEach(players.indices, id: \.self) { index in
+                                let player = players[index]
+                                let isWinner = index == 0
+                                let height = isWinner ? 520 : index == 2 ? 470 : index == 1 ? 340 : 240
                                 
                                 VStack(spacing: 10) {
                                     ZStack(alignment: .bottom) {
-                                        // Winner Star on top if first place
                                         if isWinner {
                                             Image("WinnerStar")
                                                 .resizable()
@@ -67,7 +64,6 @@ struct MultiplayerResultsView: View {
                                                 .zIndex(1)
                                         }
                                         
-                                        // Podium Bar
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color(hex: player.podiumColorHex))
                                             .frame(width: 250, height: CGFloat(height))
@@ -76,14 +72,13 @@ struct MultiplayerResultsView: View {
                                                     .stroke(Color.black, lineWidth: 5)
                                             )
                                         
-                                        // Player Image
                                         Image(player.imageName)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 188, height: 270)
                                             .offset(y: -CGFloat(height / 2) + 80)
                                     }
-                                    // Player name
+                                    
                                     Text(player.displayName)
                                         .font(.system(size: 25, weight: .bold, design: .monospaced))
                                         .foregroundColor(.black)
@@ -91,10 +86,12 @@ struct MultiplayerResultsView: View {
                                 }
                             }
                         }
-
-                .padding(.bottom, 40)
+                        .padding(.horizontal, 30)
+                        .padding(.bottom, 10)
+                        
+                    }
+                }
             }
-            .padding()
         }
         .navigationBarBackButtonHidden(true)
     }

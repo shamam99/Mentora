@@ -28,19 +28,10 @@ struct JoinRoomCodeView: View {
             VStack(spacing: 30) {
                 // Top Back Button
                 HStack {
-                    Button(action: {
-                        SoundPlayer.shared.playSound(named: "3")
+                    BackExitButton(icon: "chevron.left", topPadding: 50, leftPadding: 60, sound: "3") {
                         dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.black)
                     }
-                    .padding(.leading, 60)
-                    Spacer()
                 }
-                .padding(.top, 50)
 
                 Spacer()
 

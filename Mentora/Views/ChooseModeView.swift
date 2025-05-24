@@ -26,35 +26,34 @@ struct ChooseModeView: View {
                 .ignoresSafeArea()
 
             // Back Arrow (absolute top-left)
-            Button(action: {
-                SoundPlayer.shared.playSound(named: "3")
+            BackExitButton(icon: "chevron.left", topPadding: 30, leftPadding: 62, sound: "3") {
                 presentationMode.wrappedValue.dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.black)
-                    .padding(.top, 30)
             }
-            .padding(.leading, 62)
 
 
-            VStack() {
-                Spacer().frame(height: 280)
 
-                // Question exactly above the buttons
+
+            VStack {
+                Spacer().frame(height: 300)
+
                 Text("How would you like to play today ?")
                     .font(.custom("IBMPlexMono-Bold", size: 28))
                     .foregroundColor(.black)
-                    .frame(width: 724)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
 
-                Spacer().frame(height: 60)
+                Spacer().frame(height: 50)
 
-                HStack(spacing: 65) {
-                    ModeButton(
+                HStack(spacing: 60) {
+                    // Solo Game
+                    MentoraShadowButton(
                         label: "Solo game",
                         defaultColor: "#C09DDF",
                         pressedColor: "#945DC5",
+                        width: 310,
+                        height: 160,
+                        fontSize: 22,
+                        cornerRadius: 10,
                         isPressed: pressedButton == "solo",
                         action: {
                             pressedButton = "solo"
@@ -72,10 +71,15 @@ struct ChooseModeView: View {
                         }
                     )
 
-                    ModeButton(
+                    // Multiplayer Game
+                    MentoraShadowButton(
                         label: "Multiplayer game",
-                        defaultColor: "#0DA8E2",
-                        pressedColor: "#007CAA",
+                        defaultColor: "#C09DDF",
+                        pressedColor: "#945DC5",
+                        width: 310,
+                        height: 160,
+                        fontSize: 22,
+                        cornerRadius: 10,
                         isPressed: pressedButton == "multi",
                         action: {
                             pressedButton = "multi"
@@ -90,14 +94,15 @@ struct ChooseModeView: View {
                                     }
                                 }
                             }
-
                         }
                     )
                 }
+                .frame(maxWidth: .infinity)
+
 
                 Spacer()
             }
-            .padding(.leading, 350)
+            .frame(maxWidth: .infinity)
             NavigationLink(
                 destination: PDFUploadView(
                     vm: PDFUploadViewModel(

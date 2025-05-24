@@ -27,20 +27,25 @@ struct HomeView: View {
                     .scaledToFill()
                     .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 40) {
-                    Text("Welcome friend !")
-                        .font(.custom("IBMPlexMono-Bold", size: 34))
-                        .foregroundColor(.black)
-                        .padding(.leading, 40)
-                        .padding(.top, 40)
-                    
-                    Spacer()
+                VStack(spacing: 0) {
+                    // MARK: - Header
+                    HStack {
+                        Text("Welcome friend !")
+                            .font(.custom("IBMPlexMono-Bold", size: 34))
+                            .foregroundColor(.black)
+                            .padding(.leading, 40)
 
-                    HStack(spacing: 65) {
-                        HomeButton(
+                        Spacer()
+
+                        // Achievements Button
+                        MentoraShadowButton(
                             label: "Achievements",
                             defaultColor: "#F3CC02",
                             pressedColor: "#AA8F00",
+                            width: 160,
+                            height: 60,
+                            fontSize: 18,
+                            cornerRadius: 10,
                             isPressed: pressedButton == "achievements",
                             action: {
                                 pressedButton = "achievements"
@@ -48,12 +53,25 @@ struct HomeView: View {
                                     navAchievements = true
                                     pressedButton = nil
                                 }
-                            })
+                            }
+                        )
+                        .padding(.trailing, 40)
+                    }
+                    .padding(.top, 40)
 
-                        HomeButton(
+                    Spacer()
+
+                    // MARK: - Main Action Buttons
+                    HStack(spacing: 60) {
+                        // Create Game Button
+                        MentoraShadowButton(
                             label: "Create game",
                             defaultColor: "#C09DDF",
                             pressedColor: "#945DC5",
+                            width: 320,
+                            height: 170,
+                            fontSize: 22,
+                            cornerRadius: 12,
                             isPressed: pressedButton == "create",
                             action: {
                                 pressedButton = "create"
@@ -61,12 +79,18 @@ struct HomeView: View {
                                     navCreate = true
                                     pressedButton = nil
                                 }
-                            })
+                            }
+                        )
 
-                        HomeButton(
+                        // Join Game Button
+                        MentoraShadowButton(
                             label: "Join game",
-                            defaultColor: "#0DA8E2",
-                            pressedColor: "#007CAA",
+                            defaultColor: "#C09DDF",
+                            pressedColor: "#945DC5",
+                            width: 320,
+                            height: 170,
+                            fontSize: 22,
+                            cornerRadius: 12,
                             isPressed: pressedButton == "join",
                             action: {
                                 pressedButton = "join"
@@ -74,28 +98,10 @@ struct HomeView: View {
                                     navJoin = true
                                     pressedButton = nil
                                 }
-                            })
+                            }
+                        )
                     }
-                    .padding(.horizontal, 150)
-
-                    HStack {
-                        Spacer()
-                        HomeBottomButton(
-                            label: "Check it out first !",
-                            defaultColor: "#05D96A",
-                            pressedColor: "#009C4A",
-                            isPressed: pressedButton == "check",
-                            action: {
-                                pressedButton = "check"
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                    pressedButton = nil
-                                    showDemoVideo = true
-                                }
-                            })
-
-                        Spacer()
-                    }
-                    .padding(.top, 20)
+                    .padding(.top, 10)
 
                     Spacer()
                 }

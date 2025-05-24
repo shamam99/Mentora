@@ -30,18 +30,9 @@ struct AchievementsView: View {
 
                 // MARK: - Left Sidebar
                 VStack(spacing: 10) {
-                    Button(action: {
-                        SoundPlayer.shared.playSound(named: "3")
+                    BackExitButton(icon: "chevron.left", topPadding: 20, leftPadding: 30, sound: "3") {
                         isActive = false
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.black)
-                            .padding(.top, 20)
                     }
-                    .padding(.bottom, 70)
-                    .padding(.leading, -60)
 
                     VStack(spacing: -40) {
                         Image("profileStar")

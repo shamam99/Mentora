@@ -30,21 +30,13 @@ struct SoloGameSwipeView: View {
 
             VStack {
                 HStack {
-                    Button(action: {
-                        SoundPlayer.shared.playSound(named: "3")
-                        vm.resetGame() 
+                    BackExitButton(icon: "xmark", topPadding: 42, leftPadding: 82, sound: "3") {
+                        vm.resetGame()
                         SoloGameService.shared.resetGame()
                         SocketService.shared.disconnect()
-
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             NavigationUtil.popToRootView()
                         }
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(.custom("IBMPlexMono-Bold", size: 45))
-                            .foregroundColor(.black)
-                            .padding(.leading, 82)
-                            .padding(.top, 42)
                     }
                     Spacer()
                 }

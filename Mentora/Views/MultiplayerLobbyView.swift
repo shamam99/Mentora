@@ -29,20 +29,11 @@ struct MultiplayerLobbyView: View {
             VStack {
                 // Back Button
                 HStack {
-                    Button(action: {
-                        SoundPlayer.shared.playSound(named: "3")
+                    BackExitButton(icon: "chevron.left", topPadding: 40, leftPadding: 62, sound: "3") {
                         vm.leaveLobby()
                         presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.black)
                     }
-                    .padding(.leading, 62)
-                    Spacer()
                 }
-                .padding(.top, 40)
                 
                 Spacer()
                 
@@ -52,34 +43,41 @@ struct MultiplayerLobbyView: View {
                 Spacer()
                 
                 // Bottom Row: Room Code + Start Button
-                HStack {
-                    // Room Code
-                    Text("Code : \(vm.pinCode)")
-                        .font(.custom("IBMPlexMono-Bold", size: 28))
-                        .foregroundColor(.black)
-                        .padding(.leading, 70)
-                    
-                    Spacer()
-                    
-                    // Host Start Button
-                    if vm.isHost {
-                        Button(action: {
-                            SoundPlayer.shared.playSound(named: "1")
-                            vm.startGame()
-                        }) {
-                            Text("Start room")
-                                .font(.custom("IBMPlexMono-Bold", size: 19))
-                                .foregroundColor(.black)
-                                .frame(width: 170, height: 58)
-                                .background(vm.canStartGame ? Color(hex: "#05D96A") : Color.gray)
-                                .cornerRadius(8)
-                                .shadow(color: .black.opacity(0.25), radius: 2, x: 2, y: 2)
+                GeometryReader { geometry in
+                    let screenWidth = geometry.size.width
+                    let horizontalPadding = screenWidth * 0.06
+
+                    HStack {
+                        Text("Code : \(vm.pinCode)")
+                            .font(.custom("IBMPlexMono-Bold", size: 24))
+                            .foregroundColor(.black)
+                            .padding(.leading, horizontalPadding)
+
+                        Spacer()
+
+                        if vm.isHost {
+                            Button(action: {
+                                SoundPlayer.shared.playSound(named: "1")
+                                vm.startGame()
+                            }) {
+                                Text("Start Game")
+                                    .font(.custom("IBMPlexMono-Bold", size: 20))
+                                    .foregroundColor(.black)
+                                    .frame(width: 170, height: 58)
+                                    .background(vm.canStartGame ? Color(hex: "#05D96A") : Color.gray)
+                                    .cornerRadius(8)
+                                    .shadow(color: .black.opacity(0.5), radius: 0, x: 0, y: 6)
+                            }
+                            .padding(.trailing, horizontalPadding)
+                            .disabled(!vm.canStartGame)
                         }
-                        .padding(.trailing, 40)
-                        .disabled(!vm.canStartGame)
                     }
+                    .frame(width: screenWidth)
+                    .padding(.bottom, 32)
                 }
-                .padding(.bottom, 26)
+                .frame(height: 80)
+
+
             }
             
             // NavigationLink to MultiplayerGameView
@@ -112,43 +110,49 @@ struct MultiplayerLobbyView: View {
                 vm.leaveLobby()
             }
         }
-        
-    
     }
 }
 
 // MARK: - Puzzle Grid Layout
 struct PuzzleGridView: View {
     let players: [String]
-    private let playerImages = ["Player1", "Player2", "Player3", "Player4"]
+    private let playerImages = ["slot1", "slot2", "slot3", "slot4"]
 
     var body: some View {
-        VStack(spacing: -215) {
-            HStack(spacing: -85) {
-                playerSlot(index: 0)
-                playerSlot(index: 1)
-            }
+        GeometryReader { geometry in
+            let screenWidth = geometry.size.width
+            let pieceSize: CGFloat = min(screenWidth * 0.32, 380)
+            let charWidth: CGFloat = pieceSize * 0.7
+            let charHeight: CGFloat = pieceSize * 0.95
 
-            HStack(spacing: -95) {
-                playerSlot(index: 2)
-                playerSlot(index: 3)
+
+            VStack(spacing: -pieceSize * 0.35) {
+                HStack(spacing: -pieceSize * 0.1) {
+                    playerSlot(index: 0, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+                    playerSlot(index: 1, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+                }
+
+                HStack(spacing: -pieceSize * 0.11) {
+                    playerSlot(index: 2, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+                    playerSlot(index: 3, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(height: 650)
     }
 
-    // MARK: - Unified Slot with Per-Card Customization
-    func playerSlot(index: Int) -> some View {
+    func playerSlot(index: Int, pieceSize: CGFloat, charSize: CGSize) -> some View {
         let playerJoined = index < players.count
         let pieceImage = playerImages[index]
-        let characterImage = "character\(index + 1)"
+        let characterImage = ""
 
-        // Custom sizes per index
-        let characterOffset: (top: CGFloat, leading: CGFloat) = {
+        let offsets: (top: CGFloat, leading: CGFloat) = {
             switch index {
-            case 0: return (-145, 10)
-            case 1: return (-85, 40)
-            case 2: return (20, 90)
-            case 3: return (35, 115)
+            case 0: return (-pieceSize * 0.3, pieceSize * 0.02)
+            case 1: return (-pieceSize * 0.2, pieceSize * 0.08)
+            case 2: return (pieceSize * 0.04, pieceSize * 0.15)
+            case 3: return (pieceSize * 0.08, pieceSize * 0.22)
             default: return (0, 0)
             }
         }()
@@ -156,46 +160,15 @@ struct PuzzleGridView: View {
         return ZStack {
             Image(pieceImage)
                 .resizable()
-                .frame(width: 480, height: 480)
+                .frame(width: pieceSize, height: pieceSize)
                 .opacity(playerJoined ? 1.0 : 0.3)
 
             if playerJoined {
-                VStack(spacing: 10) {
-                    Image(characterImage)
-                        .resizable()
-                        .frame(width: 390, height: 460)
-                        .padding(.top, characterOffset.top)
-                        .padding(.leading, characterOffset.leading)
-
-
-                }
-            }
-        }
-    }
-
-
-
-    // MARK: - Bottom Row Layout
-    func bottomPlayerSlot(index: Int) -> some View {
-        let playerJoined = index < players.count
-        let pieceImage = playerImages[index]
-        let characterImage = "character\(index + 1)"
-
-        return ZStack {
-            Image(pieceImage)
-                .resizable()
-                .frame(width: 480, height: 480)
-                .opacity(playerJoined ? 1.0 : 0.3)
-
-            if playerJoined {
-                VStack(spacing: 10) {
-                    Image(characterImage)
-                        .resizable()
-                        .frame(width: 370, height: 220)
-                        .padding(.top, 45)
-                        .padding(.leading,80)
-
-                }
+                Image(characterImage)
+                    .resizable()
+                    .frame(width: charSize.width, height: charSize.height)
+                    .padding(.top, offsets.top)
+                    .padding(.leading, offsets.leading)
             }
         }
     }
