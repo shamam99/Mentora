@@ -7,6 +7,7 @@
 
 import Foundation
 import SocketIO
+import SwiftUI
 
 final class MultiplayerGameViewModel: ObservableObject {
     private let socket: SocketIOClient
@@ -20,6 +21,13 @@ final class MultiplayerGameViewModel: ObservableObject {
     @Published var correctAnswer: String? = nil
     @Published var hasAnsweredCurrentQuestion = false
     @Published var selectedAnswer: String? = nil
+    @Published var finalResults: [PlayerResult] = []
+    @Published var showResults: Bool = false
+    @Published var isInMultiplayerGame: Bool = false
+    @Published var playersInRoom: [String] = [] // Filled during join/start
+    @Published var answeredPlayers: Set<String> = [] // Track who answered
+
+
 
     var onAnswerFeedback: ((String, String) -> Void)?
 
@@ -68,11 +76,22 @@ final class MultiplayerGameViewModel: ObservableObject {
             let correct = payload["correctAnswer"] as? String ?? "N/A"
 
             DispatchQueue.main.async {
+                // ✅ Add player to answered list
+                self.answeredPlayers.insert(player)
+
+                // ✅ Update score
                 self.playerScores[player] = score
+
+                // ✅ If it's this player's answer, show feedback
                 if player == self.userId {
                     self.correctAnswer = correct
                     if let selected = self.selectedAnswer {
                         self.onAnswerFeedback?(selected, correct)
+                        if selected == correct {
+                            SoundPlayer.shared.playSound(named: "4")
+                        } else {
+                            SoundPlayer.shared.playSound(named: "5")
+                        }
                     }
                 }
                 print("🧠 [GameVM] \(player)'s score: \(score), correct: \(correct)")
@@ -81,14 +100,58 @@ final class MultiplayerGameViewModel: ObservableObject {
 
         socket.on("multiplayerGameOver") { [weak self] data, _ in
             guard let self = self,
-                  let scores = data.first as? [String: Int] else { return }
+                  let payload = data.first as? [String: [String: Any]] else { return }
 
             DispatchQueue.main.async {
-                self.playerScores = scores
+                var tempScores: [String: Int] = [:]
+                var players: [(id: String, displayName: String, score: Int)] = []
+
+                for (uid, entry) in payload {
+                    let displayName = entry["displayName"] as? String ?? "Player"
+                    let score = entry["score"] as? Int ?? 0
+                    tempScores[uid] = score
+                    players.append((uid, displayName, score))
+                }
+
+                self.playerScores = tempScores
                 self.isGameOver = true
-                print("🏁 [GameVM] Game over. Scores: \(scores)")
+                print("🏁 [GameVM] Game over. Scores: \(tempScores)")
+
+                let sorted = players.sorted { $0.score > $1.score }
+
+                let mapped = sorted.enumerated().map { (index, entry) -> PlayerResult in
+                    let podiumColorHex: String
+                    let image: String
+
+                    switch index {
+                    case 0:
+                        image = "PlayerOrange"
+                        podiumColorHex = "#F67348"
+                    case 1:
+                        image = "PlayerPink"
+                        podiumColorHex = "#F9A7F9"
+                    case 2:
+                        image = "PlayerPurple"
+                        podiumColorHex = "#C09DDF"
+                    default:
+                        image = "PlayerYellow"
+                        podiumColorHex = "#F3CC02"
+                    }
+
+                    return PlayerResult(
+                        userId: entry.id,
+                        displayName: entry.id == self.userId ? "You" : entry.displayName,
+                        score: entry.score,
+                        imageName: image,
+                        podiumColorHex: podiumColorHex
+                    )
+                }
+
+                self.finalResults = mapped
+                self.showResults = true
             }
         }
+
     }
 
     private func handleQuestion(_ raw: Any?) {
@@ -111,6 +174,7 @@ final class MultiplayerGameViewModel: ObservableObject {
             self.totalQuestions = total
             self.hasAnsweredCurrentQuestion = false
             self.selectedAnswer = nil
+            self.answeredPlayers = []
             print("✅ [GameVM] Question updated in ViewModel at index: \(index)")
         }
     }
@@ -119,5 +183,20 @@ final class MultiplayerGameViewModel: ObservableObject {
         print("[GameVM] Leaving game...")
         socket.emit("leaveMultiplayerGame", ["userId": userId])
         socket.removeAllHandlers()
+        
+        // Reset all local game state
+        DispatchQueue.main.async {
+            self.currentQuestion = nil
+            self.currentIndex = 0
+            self.totalQuestions = 0
+            self.isGameOver = false
+            self.playerScores = [:]
+            self.correctAnswer = nil
+            self.hasAnsweredCurrentQuestion = false
+            self.selectedAnswer = nil
+            self.finalResults = []
+            self.showResults = false
+        }
     }
+
 }

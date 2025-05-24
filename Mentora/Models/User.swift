@@ -14,4 +14,16 @@ struct User: Codable {
     let displayName: String
     let avatarURL: String?
     let hearts: Int
+    let streak: Int
+    let subscription: Subscription?
+    let achievements: [Achievement]
+
+}
+
+
+struct UserAchievement: Codable {
+    let id: String
+    let title: String
+    let description: String
+    let isUnlocked: Bool 
 }

@@ -17,7 +17,7 @@ final class SocketService {
 
     private init() {
         self.manager = SocketManager(
-            socketURL: URL(string: "http://192.168.8.153:3001")!,
+            socketURL: URL(string: "https://mentorabackend.onrender.com")!,
             config: [
                 .log(true),
                 .compress,

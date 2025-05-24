@@ -75,12 +75,20 @@ class SoloGameService: ObservableObject {
             if let dict = data.first as? [String: Any],
                let correct = dict["correct"] as? Bool,
                let correctAns = dict["correctAnswer"] as? String {
+
                 DispatchQueue.main.async {
                     self.lastAnswerCorrect = correct
                     self.correctAnswer = correctAns
+
+                    if correct {
+                        SoundPlayer.shared.playSound(named: "4") // Correct sound
+                    } else {
+                        SoundPlayer.shared.playSound(named: "5") // Incorrect sound
+                    }
                 }
             }
         }
+
 
         socket.on("soloGameOver") { [weak self] data, _ in
             guard let self = self else { return }

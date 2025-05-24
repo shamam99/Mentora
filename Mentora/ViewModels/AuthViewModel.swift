@@ -8,9 +8,14 @@
 import Foundation
 
 class AuthViewModel: ObservableObject {
-    @Published var user: User?
+    @Published var user: User? = nil
     @Published var token: String?
     @Published var error: String?
+    
+    // Provide unlocked achievement IDs to other view models
+    var unlockedAchievementIDs: [String] {
+        user?.achievements.map { $0.id } ?? []
+    }
 
     init() {
         loadFromKeychain()
@@ -81,7 +86,7 @@ class AuthViewModel: ObservableObject {
         
         if TokenRefreshManager.shared.shouldRefreshToken() {
             // Call refresh token endpoint
-            guard let url = URL(string: "http://192.168.8.153:3001/auth/refresh-token") else { return }
+            guard let url = URL(string: "https://mentorabackend.onrender.com/auth/refresh-token") else { return }
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"

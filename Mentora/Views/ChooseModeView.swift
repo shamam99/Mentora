@@ -27,18 +27,20 @@ struct ChooseModeView: View {
 
             // Back Arrow (absolute top-left)
             Button(action: {
+                SoundPlayer.shared.playSound(named: "3")
                 presentationMode.wrappedValue.dismiss()
             }) {
-                Image(systemName: "arrow.left")
+                Image(systemName: "chevron.left")
                     .resizable()
-                    .frame(width: 32, height: 32)
+                    .frame(width: 30, height: 30)
                     .foregroundColor(.black)
-                    .padding(.leading, 32)
-                    .padding(.top, 32)
+                    .padding(.top, 30)
             }
+            .padding(.leading, 62)
+
 
             VStack() {
-                Spacer().frame(height: 240)
+                Spacer().frame(height: 280)
 
                 // Question exactly above the buttons
                 Text("How would you like to play today ?")
@@ -95,7 +97,7 @@ struct ChooseModeView: View {
 
                 Spacer()
             }
-            .padding(.leading, 250)
+            .padding(.leading, 350)
             NavigationLink(
                 destination: PDFUploadView(
                     vm: PDFUploadViewModel(

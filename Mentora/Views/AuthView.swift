@@ -5,7 +5,6 @@
 //  Created by Shamam Alkafri on 05/05/2025.
 //
 
-
 import SwiftUI
 
 struct AuthView: View {
@@ -49,8 +48,10 @@ struct AuthView: View {
     private func startLoginIfNeeded() {
         guard authVM.user == nil else { return }
 
-        print("[AuthView] Starting Game Center auth...")
+        print("[AuthView] Sending FastAPI warm-up ping...")
+        pingFastAPIService()
 
+        print("[AuthView] Starting Game Center auth...")
         gameCenterManager.authenticateUser { success in
             DispatchQueue.main.async {
                 if success {
@@ -62,5 +63,16 @@ struct AuthView: View {
                 }
             }
         }
+    }
+
+    private func pingFastAPIService() {
+        guard let url = URL(string: "https://mentorabackend.onrender.com/api/question/health") else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) { _, _, _ in
+            print("[AuthView] FastAPI warm-up ping sent")
+        }.resume()
     }
 }

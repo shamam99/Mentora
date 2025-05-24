@@ -23,7 +23,9 @@ struct HomeButton: View {
                 .frame(width: 324, height: 306) // slightly taller
 
             // Actual button layer — slightly offset up
-            Button(action: action) {
+            Button(action:{ SoundPlayer.shared.playSound(named: "1")
+                
+                action()}) {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
                     .frame(width: 317, height: 276)
@@ -59,7 +61,9 @@ struct HomeBottomButton: View {
                 .frame(width: 493, height: 122)
 
             // Active button on top — slightly moved up
-            Button(action: action) {
+            Button(action: { SoundPlayer.shared.playSound(named: "1")
+                
+                action()}) {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
                     .frame(width: 483, height: 96)

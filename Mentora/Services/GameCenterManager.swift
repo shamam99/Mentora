@@ -71,4 +71,24 @@ class GameCenterManager: ObservableObject {
             completion(.success(payload))
         }
     }
+    
+    func reportAchievement(id: String, percent: Double = 100.0) {
+        guard GKLocalPlayer.local.isAuthenticated else {
+            print("Game Center not authenticated")
+            return
+        }
+
+        let achievement = GKAchievement(identifier: id)
+        achievement.percentComplete = percent
+        achievement.showsCompletionBanner = true
+
+        GKAchievement.report([achievement]) { error in
+            if let error = error {
+                print("Failed to report achievement: \(error.localizedDescription)")
+            } else {
+                print("Achievement \(id) reported")
+            }
+        }
+    }
+
 }

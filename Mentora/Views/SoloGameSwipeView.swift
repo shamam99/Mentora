@@ -30,11 +30,20 @@ struct SoloGameSwipeView: View {
 
             VStack {
                 HStack {
-                    Button(action: { dismiss() }) {
-                        Text("X")
-                            .font(.custom("IBMPlexMono-Bold", size: 50))
+                    Button(action: {
+                        SoundPlayer.shared.playSound(named: "3")
+                        vm.resetGame() 
+                        SoloGameService.shared.resetGame()
+                        SocketService.shared.disconnect()
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            NavigationUtil.popToRootView()
+                        }
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.custom("IBMPlexMono-Bold", size: 45))
                             .foregroundColor(.black)
-                            .padding(.leading, 42)
+                            .padding(.leading, 82)
                             .padding(.top, 42)
                     }
                     Spacer()
@@ -43,13 +52,80 @@ struct SoloGameSwipeView: View {
             }
 
             if vm.showResult {
-                VStack(spacing: 24) {
-                    Text("Game Over")
-                        .font(.largeTitle).bold()
-                    Text("Your Score: \(vm.finalScore ?? 0)/\(vm.total)")
-                        .font(.title2).foregroundColor(.green)
+                ZStack {
+                    // Top decoration corners
+                    HStack(spacing: -30) {
+                        Image("topCorner")
+                            .resizable()
+                            .frame(width: 480, height: 340)
+                            .offset(x: 245, y: 105)
+
+                        Image("topCorner")
+                            .resizable()
+                            .frame(width: 180, height: 140)
+                            .rotationEffect(.degrees(180))
+                            .offset(x: 5)
+                    }
+                    .offset(y: -190)
+
+                    // Bottom decoration corners
+                    HStack(spacing: -30) {
+                        Image("bottomCorner")
+                            .resizable()
+                            .frame(width: 480, height: 340)
+                            .offset(x: -85, y: -105)
+
+                        Image("bottomCorner")
+                            .resizable()
+                            .frame(width: 180, height: 140)
+                            .rotationEffect(.degrees(180))
+                            .offset(x: -450, y: -40)
+                    }
+                    .offset(y: 190)
+
+                    // Center yellow card with result
+                    ZStack {
+                        Image("middleCard")
+                            .resizable()
+                            .frame(width: 640, height: 370)
+
+                        VStack(spacing: 32) {
+                            Text("Game Over")
+                                .font(.custom("IBMPlexMono-Bold", size: 32))
+                                .foregroundColor(.black)
+
+                            Text(vm.supportiveMessage)
+                                .font(.custom("IBMPlexMono-Regular", size: 20))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 24)
+
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.black)
+                                    .frame(width: 230, height: 52)
+                                    .offset(y: 1.5)
+
+                                Button(action: {
+                                    SoundPlayer.shared.playSound(named: "3")
+                                    NavigationUtil.popToRootView()
+                                }) {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color(hex: "#05D96A"))
+                                        .frame(width: 225, height: 46)
+                                        .overlay(
+                                            Text("Score: \(vm.finalScore ?? 0)/\(vm.total)")
+                                                .font(.custom("IBMPlexMono-Bold", size: 18))
+                                                .foregroundColor(.black)
+                                        )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
                 }
-            } else {
+                .transition(.opacity)
+            }else {
                 VStack {
                     Spacer()
 
@@ -85,11 +161,6 @@ struct SoloGameSwipeView: View {
                     Spacer()
 
                     HStack(spacing: 36) {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.black)
-                            .onTapGesture { swipe(.left) }
 
                         Image("btnLeft")
                             .resizable()
@@ -100,22 +171,19 @@ struct SoloGameSwipeView: View {
                             Image("counterBadge")
                                 .resizable()
                                 .frame(width: 70, height: 80)
+                                .padding(.top, 15)
 
                             Text("\(vm.currentIndex)")
                                 .font(.custom("IBMPlexMono-Bold", size: 20))
                                 .foregroundColor(.black)
                         }
+                        .padding(.horizontal, 20)
 
                         Image("btnRight")
                             .resizable()
                             .frame(width: 32, height: 42)
                             .onTapGesture { swipe(.right) }
 
-                        Image(systemName: "checkmark")
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.black)
-                            .onTapGesture { swipe(.right) }
                     }
                     .padding(.bottom, 32)
                 }
@@ -123,10 +191,11 @@ struct SoloGameSwipeView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            cardStack = []
             vm.resetGame()
             vm.startGame()
-            cardStack = []
         }
+
         .onChange(of: vm.question) { newQuestion in
             if let q = newQuestion {
                 cardStack.append(q)
@@ -145,7 +214,7 @@ struct SoloGameSwipeView: View {
                 } else if swipeDirection == .right && showTop {
                     return Image("CardGreen")
                 } else {
-                    return Image("CardPink")
+                    return Image("CardPink2")
                 }
             }()
 
@@ -155,12 +224,12 @@ struct SoloGameSwipeView: View {
                 .shadow(radius: 4)
 
             Text(question.text)
-                .font(.custom("IBMPlexMono-Bold", size: 16))
+                .font(.custom("IBMPlexMono-Bold", size: 20))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
-                .frame(width: 250, height: 120)
-                .offset(y: 140)
+                .frame(width: 250, height: 140)
+                .offset(y: 100)
         }
         .frame(width: 520, height: 650)
 
@@ -197,13 +266,77 @@ struct SoloGameSwipeView: View {
 
 
 #Preview {
-    PDFUploadView(vm: PDFUploadViewModel(
-        userId: "test",
-        displayName: "Test",
-        mode: "tf",
-        roomVM: RoomViewModel()
-    ))
-    .environmentObject(AuthViewModel())
-    .previewDevice("iPad Pro (11-inch)")
+    ZStack {
+        Color(hex: "#FEFAED").ignoresSafeArea()
+        Image("bg").resizable().scaledToFill().ignoresSafeArea()
+
+        ZStack {
+            // Top decoration corners
+            HStack(spacing: -30) {
+                Image("topCorner")
+                    .resizable()
+                    .frame(width: 480, height: 340)
+                    .offset(x: 245, y: 105)
+                Image("topCorner")
+                    .resizable()
+                    .frame(width: 180, height: 140)
+                    .rotationEffect(.degrees(180))
+                    .offset(x: 5)
+            }
+            .offset(y: -190)
+            
+            // Bottom decoration corners
+            HStack(spacing: -30) {
+                Image("bottomCorner")
+                    .resizable()
+                    .frame(width: 480, height: 340)
+                    .offset(x: -85, y: -105)
+                Image("bottomCorner")
+                    .resizable()
+                    .frame(width: 180, height: 140)
+                    .rotationEffect(.degrees(180))
+                    .offset(x: -450, y:-40)
+            }
+            .offset(y: 190)
+
+            // Middle yellow card
+            ZStack {
+                Image("middleCard")
+                    .resizable()
+                    .frame(width: 640, height: 370)
+
+                VStack(spacing: 32) {
+                    Text("Game Over")
+                        .font(.custom("IBMPlexMono-Bold", size: 32))
+                        .foregroundColor(.black)
+
+                    Text("Great job! You're almost perfect. 🎯")
+                        .font(.custom("IBMPlexMono-Regular", size: 20))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 24)
+
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.black)
+                            .frame(width: 230, height: 52)
+                            .offset(y: 1.5)
+
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(hex: "#05D96A"))
+                            .frame(width: 225, height: 46)
+                            .overlay(
+                                Text("Score: 7/10")
+                                    .font(.custom("IBMPlexMono-Bold", size: 18))
+                                    .foregroundColor(.black)
+                            )
+                    }
+                }
+            }
+
+        }
+    }
+    .previewDevice("iPad Pro (13-inch)")
     .previewInterfaceOrientation(.landscapeLeft)
 }
+

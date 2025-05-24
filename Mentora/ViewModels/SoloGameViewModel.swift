@@ -62,4 +62,20 @@ class SoloGameViewModel: ObservableObject {
         currentIndex = 0
         total = 0
     }
+    
+    var supportiveMessage: String {
+        guard let score = finalScore else { return "" }
+        let percentage = Double(score) / Double(total)
+
+        switch percentage {
+        case 0..<0.4:
+            return "It's okay to miss a few! You're on your way."
+        case 0.4..<0.7:
+            return "Not bad! You're learning fast. Try again?"
+        case 0.7..<0.9:
+            return "Great job! You're almost perfect."
+        default:
+            return "Outstanding! You nailed it! 🎉"
+        }
+    }
 }

@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import AVKit
 
 struct HomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
@@ -14,10 +15,11 @@ struct HomeView: View {
     @State private var navCreate = false
     @State private var navJoin = false
     @State private var navAchievements = false
+    @State private var showDemoVideo = false
+
 
     var body: some View {
         NavigationStack {
-            Spacer()
             ZStack {
                 Color(hex: "#FEFAED").ignoresSafeArea()
                 Image("bg")
@@ -74,7 +76,7 @@ struct HomeView: View {
                                 }
                             })
                     }
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, 150)
 
                     HStack {
                         Spacer()
@@ -87,9 +89,10 @@ struct HomeView: View {
                                 pressedButton = "check"
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                                     pressedButton = nil
-                                    // stub
+                                    showDemoVideo = true
                                 }
                             })
+
                         Spacer()
                     }
                     .padding(.top, 20)
@@ -100,16 +103,27 @@ struct HomeView: View {
                 // MARK: - Navigation Links
                 NavigationLink("", destination: ChooseModeView().environmentObject(authVM), isActive: $navCreate).hidden()
                 NavigationLink("", destination: JoinRoomCodeView().environmentObject(authVM), isActive: $navJoin).hidden()
-                NavigationLink("", destination: AchievementsView().environmentObject(authVM), isActive: $navAchievements).hidden()
+                NavigationLink(
+                    "",
+                    destination: AchievementsView(isActive: $navAchievements, streak: authVM.user?.streak ?? 1)
+                        .environmentObject(authVM),
+                    isActive: $navAchievements
+                ).hidden()
+
+
             }
             .navigationBarBackButtonHidden(true)
+            .sheet(isPresented: $showDemoVideo) {
+                DemoVideoView()
+            }
+
         }
     }
+    
 }
 
 #Preview {
     HomeView()
         .environmentObject(AuthViewModel())
-        .previewDevice("iPad Pro (11-inch)")
         .previewInterfaceOrientation(.landscapeLeft)
 }

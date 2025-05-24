@@ -10,7 +10,7 @@ import Foundation
 class APIManager {
     
     static let shared = APIManager()
-    private let baseURL = "http://192.168.8.153:3001"
+    private let baseURL = "https://mentorabackend.onrender.com"
 
     func loginWithGameCenter(payload: [String: String], completion: @escaping (Result<(User, String), Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/auth/apple-gamecenter-login") else {
@@ -170,6 +170,44 @@ class APIManager {
             } catch {
                 print("[RoomDecodeError] \(error.localizedDescription)")
                 print("[Raw] \(String(data: data, encoding: .utf8) ?? "Unreadable")")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func fetchAchievements(completion: @escaping (Result<[Achievement], Error>) -> Void) {
+        guard let token = KeychainManager.shared.getToken() else {
+            return completion(.failure(NSError(domain: "Missing token", code: 401)))
+        }
+
+        guard let url = URL(string: "\(baseURL)/user/me") else {
+            return completion(.failure(NSError(domain: "Invalid URL", code: 1001)))
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                return completion(.failure(error))
+            }
+
+            guard let data = data else {
+                return completion(.failure(NSError(domain: "No data", code: 1002)))
+            }
+
+            do {
+                let decoded = try JSONDecoder().decode(User.self, from: data)
+                let achievements = decoded.achievements.map {
+                    Achievement(id: $0.id,
+                                title: $0.title,
+                                description: $0.description,
+                                iconName: $0.isUnlocked ? "lightStar" : "offStar",
+                                isUnlocked: $0.isUnlocked)
+                }
+                completion(.success(achievements))
+            } catch {
                 completion(.failure(error))
             }
         }.resume()

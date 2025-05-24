@@ -20,7 +20,10 @@ struct ModeButton: View {
                 .fill(Color.black)
                 .frame(width: 324, height: 306)
 
-            Button(action: action) {
+            Button(action: {
+                SoundPlayer.shared.playSound(named: "1")
+                action() // call the original action
+            })  {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: isPressed ? pressedColor : defaultColor))
                     .frame(width: 317, height: 276)

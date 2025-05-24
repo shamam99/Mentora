@@ -25,49 +25,52 @@ struct MultiplayerLobbyView: View {
             // Background
             Color(hex: "#FEFAED").ignoresSafeArea()
             Image("bg").resizable().scaledToFill().ignoresSafeArea()
-
+            
             VStack {
                 // Back Button
                 HStack {
                     Button(action: {
+                        SoundPlayer.shared.playSound(named: "3")
                         vm.leaveLobby()
                         presentationMode.wrappedValue.dismiss()
                     }) {
-                        Image(systemName: "arrow.left")
+                        Image(systemName: "chevron.left")
                             .resizable()
-                            .frame(width: 28, height: 28)
+                            .frame(width: 30, height: 30)
                             .foregroundColor(.black)
-                            .padding(16)
                     }
+                    .padding(.leading, 62)
                     Spacer()
                 }
-
+                .padding(.top, 40)
+                
                 Spacer()
-
+                
                 // Player Grid (Puzzle Layout)
                 PuzzleGridView(players: vm.players)
-
+                
                 Spacer()
-
+                
                 // Bottom Row: Room Code + Start Button
                 HStack {
                     // Room Code
                     Text("Code : \(vm.pinCode)")
-                        .font(.custom("IBMPlexMono-Bold", size: 20))
+                        .font(.custom("IBMPlexMono-Bold", size: 28))
                         .foregroundColor(.black)
-                        .padding(.leading, 40)
-
+                        .padding(.leading, 70)
+                    
                     Spacer()
-
+                    
                     // Host Start Button
                     if vm.isHost {
                         Button(action: {
+                            SoundPlayer.shared.playSound(named: "1")
                             vm.startGame()
                         }) {
                             Text("Start room")
-                                .font(.custom("IBMPlexMono-Bold", size: 18))
+                                .font(.custom("IBMPlexMono-Bold", size: 19))
                                 .foregroundColor(.black)
-                                .frame(width: 160, height: 48)
+                                .frame(width: 170, height: 58)
                                 .background(vm.canStartGame ? Color(hex: "#05D96A") : Color.gray)
                                 .cornerRadius(8)
                                 .shadow(color: .black.opacity(0.25), radius: 2, x: 2, y: 2)
@@ -76,9 +79,9 @@ struct MultiplayerLobbyView: View {
                         .disabled(!vm.canStartGame)
                     }
                 }
-                .padding(.bottom, 24)
+                .padding(.bottom, 26)
             }
-
+            
             // NavigationLink to MultiplayerGameView
             NavigationLink(
                 destination: Group {
@@ -94,7 +97,7 @@ struct MultiplayerLobbyView: View {
             ) {
                 EmptyView()
             }
-
+            
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
@@ -109,8 +112,8 @@ struct MultiplayerLobbyView: View {
                 vm.leaveLobby()
             }
         }
-
-
+        
+    
     }
 }
 
@@ -120,45 +123,96 @@ struct PuzzleGridView: View {
     private let playerImages = ["Player1", "Player2", "Player3", "Player4"]
 
     var body: some View {
-        VStack(spacing: -144) {
-            HStack(spacing: -68) {
+        VStack(spacing: -215) {
+            HStack(spacing: -85) {
                 playerSlot(index: 0)
                 playerSlot(index: 1)
             }
-            HStack(spacing: -76) {
+
+            HStack(spacing: -95) {
                 playerSlot(index: 2)
                 playerSlot(index: 3)
             }
         }
     }
 
+    // MARK: - Unified Slot with Per-Card Customization
     func playerSlot(index: Int) -> some View {
         let playerJoined = index < players.count
-        let imageName = playerImages[index]
+        let pieceImage = playerImages[index]
+        let characterImage = "character\(index + 1)"
+
+        // Custom sizes per index
+        let characterOffset: (top: CGFloat, leading: CGFloat) = {
+            switch index {
+            case 0: return (-145, 10)
+            case 1: return (-85, 40)
+            case 2: return (20, 90)
+            case 3: return (35, 115)
+            default: return (0, 0)
+            }
+        }()
 
         return ZStack {
-            Image(imageName)
+            Image(pieceImage)
                 .resizable()
-                .frame(width: 370, height: 370)
-                .opacity(playerJoined ? 1 : 0.3)
-                .shadow(color: .black.opacity(playerJoined ? 0 : 0.25), radius: 4, x: 2, y: 2)
+                .frame(width: 480, height: 480)
+                .opacity(playerJoined ? 1.0 : 0.3)
 
             if playerJoined {
-                Text("Player \(index + 1)")
-                    .font(.custom("IBMPlexMono-Bold", size: 22))
-                    .foregroundColor(.black)
+                VStack(spacing: 10) {
+                    Image(characterImage)
+                        .resizable()
+                        .frame(width: 390, height: 460)
+                        .padding(.top, characterOffset.top)
+                        .padding(.leading, characterOffset.leading)
+
+
+                }
+            }
+        }
+    }
+
+
+
+    // MARK: - Bottom Row Layout
+    func bottomPlayerSlot(index: Int) -> some View {
+        let playerJoined = index < players.count
+        let pieceImage = playerImages[index]
+        let characterImage = "character\(index + 1)"
+
+        return ZStack {
+            Image(pieceImage)
+                .resizable()
+                .frame(width: 480, height: 480)
+                .opacity(playerJoined ? 1.0 : 0.3)
+
+            if playerJoined {
+                VStack(spacing: 10) {
+                    Image(characterImage)
+                        .resizable()
+                        .frame(width: 370, height: 220)
+                        .padding(.top, 45)
+                        .padding(.leading,80)
+
+                }
             }
         }
     }
 }
 
+
 #Preview {
-    MultiplayerLobbyView(
-        userId: "dummy-id",
-        displayName: "Tester",
-        pinCode: "123456"
-    )
-    .environmentObject(AuthViewModel())
-    .previewDevice("iPad Pro (11-inch)")
+    ZStack {
+        Color(hex: "#FEFAED").ignoresSafeArea()
+        Image("bg").resizable().scaledToFill().ignoresSafeArea()
+        
+        VStack {
+            Spacer()
+            PuzzleGridView(players: ["Player1", "Player2", "Player3", "Player4"])
+            Spacer()
+        }
+    }
+    .previewDevice("iPad Pro (13-inch)")
     .previewInterfaceOrientation(.landscapeLeft)
 }

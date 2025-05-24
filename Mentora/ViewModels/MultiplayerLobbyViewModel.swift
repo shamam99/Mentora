@@ -52,7 +52,7 @@ final class MultiplayerLobbyViewModel: ObservableObject {
                   let pin = dict["pinCode"] as? String,
                   let names = dict["players"] as? [String],
                   let hostId = dict["hostId"] as? String else {
-                print("❌ Invalid lobby update data")
+                print(" Invalid lobby update data")
                 return
             }
 
@@ -60,11 +60,11 @@ final class MultiplayerLobbyViewModel: ObservableObject {
                 self.pinCode = pin
                 self.players = names
                 self.isHost = (hostId == self.userId)
-                print("✅ Lobby Update → Players: \(names), isHost: \(self.isHost)")
+                print(" Lobby Update → Players: \(names), isHost: \(self.isHost)")
 
                 if let roomId = dict["roomId"] as? String {
                     RoomManager.shared.roomId = roomId
-                    print("🔑 Stored roomId: \(roomId)")
+                    print(" Stored roomId: \(roomId)")
                 }
             }
         }
@@ -72,16 +72,16 @@ final class MultiplayerLobbyViewModel: ObservableObject {
         socket.on("multiplayerQuestion") { [weak self] data, _ in
             guard let self = self,
                   let payload = data.first as? [String: Any] else {
-                print("❌ Failed to receive multiplayerQuestion")
+                print(" Failed to receive multiplayerQuestion")
                 return
             }
 
             if let gameVM = self.gameVM {
-                print("📥 Forwarding first question directly to gameVM")
+                print(" Forwarding first question directly to gameVM")
                 gameVM.setupListeners()
                 gameVM.submitAnswer("") // trigger to ensure setup?
             } else {
-                print("📦 Caching first multiplayer question payload")
+                print(" Caching first multiplayer question payload")
                 self.pendingQuestionPayload = payload
             }
         }
@@ -89,11 +89,12 @@ final class MultiplayerLobbyViewModel: ObservableObject {
         socket.on("multiplayerGameStarted") { [weak self] _, _ in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                print("🚀 Received multiplayerGameStarted. Navigating to game.")
+                print(" Received multiplayerGameStarted. Navigating to game.")
                 self.gameVM = MultiplayerGameViewModel(
                     userId: self.userId,
                     initialQuestionPayload: self.pendingQuestionPayload
                 )
+                self.gameVM?.playersInRoom = self.players
                 self.navigateToGame = true
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
@@ -132,7 +133,7 @@ final class MultiplayerLobbyViewModel: ObservableObject {
     // MARK: - Host Starts Game
     func startGame() {
         guard let roomId = RoomManager.shared.roomId else {
-            print("❗️[LobbyVM] Missing roomId for starting game")
+            print("[LobbyVM] Missing roomId for starting game")
             return
         }
 
