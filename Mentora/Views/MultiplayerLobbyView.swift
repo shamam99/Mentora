@@ -14,35 +14,31 @@ struct MultiplayerLobbyView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var isLoadingGame = true
 
-    
-
     let userId: String
     let displayName: String
     let pinCode: String?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             Color(hex: "#FEFAED").ignoresSafeArea()
             Image("bg").resizable().scaledToFill().ignoresSafeArea()
-            
+
             VStack {
-                // Back Button
+                // Back
                 HStack {
-                    BackExitButton(icon: "chevron.left", topPadding: 40, leftPadding: 62, sound: "3") {
+                    BackExitButton(icon: "chevron.left", topPadding: 50, leftPadding: 42, sound: "3") {
                         vm.leaveLobby()
                         presentationMode.wrappedValue.dismiss()
                     }
+                    Spacer()
                 }
-                
-                Spacer()
-                
-                // Player Grid (Puzzle Layout)
+
+                // Puzzle Grid
                 PuzzleGridView(players: vm.players)
-                
+
                 Spacer()
-                
-                // Bottom Row: Room Code + Start Button
+
+                // Bottom bar
                 GeometryReader { geometry in
                     let screenWidth = geometry.size.width
                     let horizontalPadding = screenWidth * 0.06
@@ -73,14 +69,12 @@ struct MultiplayerLobbyView: View {
                         }
                     }
                     .frame(width: screenWidth)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 52)
                 }
                 .frame(height: 80)
-
-
             }
-            
-            // NavigationLink to MultiplayerGameView
+
+            // Navigation
             NavigationLink(
                 destination: Group {
                     if let gameVM = vm.gameVM, !isLoadingGame {
@@ -95,7 +89,6 @@ struct MultiplayerLobbyView: View {
             ) {
                 EmptyView()
             }
-            
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
@@ -105,7 +98,6 @@ struct MultiplayerLobbyView: View {
             }
         }
         .onDisappear {
-            // Only leave lobby if game hasn't started
             if !vm.navigateToGame {
                 vm.leaveLobby()
             }
@@ -113,79 +105,51 @@ struct MultiplayerLobbyView: View {
     }
 }
 
-// MARK: - Puzzle Grid Layout
 struct PuzzleGridView: View {
     let players: [String]
     private let playerImages = ["slot1", "slot2", "slot3", "slot4"]
 
     var body: some View {
         GeometryReader { geometry in
-            let screenWidth = geometry.size.width
-            let pieceSize: CGFloat = min(screenWidth * 0.32, 380)
-            let charWidth: CGFloat = pieceSize * 0.7
-            let charHeight: CGFloat = pieceSize * 0.95
+            let screenHeight = geometry.size.height
+            let pieceSize: CGFloat = min(screenHeight * 0.53, 350)
 
-
-            VStack(spacing: -pieceSize * 0.35) {
-                HStack(spacing: -pieceSize * 0.1) {
-                    playerSlot(index: 0, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
-                    playerSlot(index: 1, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+            VStack(spacing: -pieceSize * 0.25) {
+                HStack(spacing: -pieceSize * 0.06) {
+                    playerSlot(index: 0, pieceSize: pieceSize)
+                    playerSlot(index: 1, pieceSize: pieceSize)
                 }
 
-                HStack(spacing: -pieceSize * 0.11) {
-                    playerSlot(index: 2, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
-                    playerSlot(index: 3, pieceSize: pieceSize, charSize: CGSize(width: charWidth, height: charHeight))
+                HStack(spacing: -pieceSize * 0.30) {
+                    playerSlot(index: 2, pieceSize: pieceSize)
+                    playerSlot(index: 3, pieceSize: pieceSize)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(height: 650)
+        .frame(height: 700) // You can tweak this if needed
     }
 
-    func playerSlot(index: Int, pieceSize: CGFloat, charSize: CGSize) -> some View {
+    func playerSlot(index: Int, pieceSize: CGFloat) -> some View {
         let playerJoined = index < players.count
         let pieceImage = playerImages[index]
-        let characterImage = ""
-
-        let offsets: (top: CGFloat, leading: CGFloat) = {
-            switch index {
-            case 0: return (-pieceSize * 0.3, pieceSize * 0.02)
-            case 1: return (-pieceSize * 0.2, pieceSize * 0.08)
-            case 2: return (pieceSize * 0.04, pieceSize * 0.15)
-            case 3: return (pieceSize * 0.08, pieceSize * 0.22)
-            default: return (0, 0)
-            }
-        }()
 
         return ZStack {
             Image(pieceImage)
                 .resizable()
                 .frame(width: pieceSize, height: pieceSize)
                 .opacity(playerJoined ? 1.0 : 0.3)
-
-            if playerJoined {
-                Image(characterImage)
-                    .resizable()
-                    .frame(width: charSize.width, height: charSize.height)
-                    .padding(.top, offsets.top)
-                    .padding(.leading, offsets.leading)
-            }
         }
     }
 }
 
-
 #Preview {
-    ZStack {
-        Color(hex: "#FEFAED").ignoresSafeArea()
-        Image("bg").resizable().scaledToFill().ignoresSafeArea()
-        
-        VStack {
-            Spacer()
-            PuzzleGridView(players: ["Player1", "Player2", "Player3", "Player4"])
-            Spacer()
-        }
-    }
-    .previewDevice("iPad Pro (13-inch)")
+    MultiplayerLobbyView(
+        userId: "previewUser",
+        displayName: "Shamam",
+        pinCode: "1234"
+    )
+    .environmentObject(AuthViewModel())
+    .previewDevice("iPad Pro (11-inch)")
     .previewInterfaceOrientation(.landscapeLeft)
 }

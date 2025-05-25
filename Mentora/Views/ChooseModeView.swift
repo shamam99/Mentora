@@ -26,7 +26,7 @@ struct ChooseModeView: View {
                 .ignoresSafeArea()
 
             // Back Arrow (absolute top-left)
-            BackExitButton(icon: "chevron.left", topPadding: 30, leftPadding: 62, sound: "3") {
+            BackExitButton(icon: "chevron.left", topPadding: 30, leftPadding: 42, sound: "3") {
                 presentationMode.wrappedValue.dismiss()
             }
 

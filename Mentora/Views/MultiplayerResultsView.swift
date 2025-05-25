@@ -52,7 +52,7 @@ struct MultiplayerResultsView: View {
                             ForEach(players.indices, id: \.self) { index in
                                 let player = players[index]
                                 let isWinner = index == 0
-                                let height = isWinner ? 520 : index == 2 ? 470 : index == 1 ? 340 : 240
+                                let height = isWinner ? 500 : index == 2 ? 450 : index == 1 ? 320 : 220
                                 
                                 VStack(spacing: 10) {
                                     ZStack(alignment: .bottom) {

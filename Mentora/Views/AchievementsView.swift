@@ -26,124 +26,126 @@ struct AchievementsView: View {
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            HStack(alignment: .top, spacing: 10) {
-
-                // MARK: - Left Sidebar
-                VStack(spacing: 10) {
-                    BackExitButton(icon: "chevron.left", topPadding: 20, leftPadding: 30, sound: "3") {
+            HStack(alignment: .top, spacing: 30) {
+                // MARK: - Sidebar
+                VStack(spacing: 66) {
+                    BackExitButton(icon: "chevron.left", topPadding: 20, leftPadding: 0, sound: "3") {
                         isActive = false
                     }
 
-                    VStack(spacing: -40) {
+
+                    VStack(spacing: 0) {
                         Image("profileStar")
                             .resizable()
-                            .frame(width: 90, height: 90)
+                            .frame(width: 100, height: 100)
 
                         Text("\(vm.currentStreak) / 6")
-                            .font(.custom("IBMPlexMono-Regular", size: 22))
+                            .font(.custom("IBMPlexMono-Regular", size: 24))
                             .foregroundColor(.black)
-                            .padding(.top, 58)
+                            .padding(.top, 10)
+                            .padding(.bottom, -30)
 
                         Image("profileImage")
                             .resizable()
-                            .frame(width: 240, height: 260)
+                            .frame(width: 220, height: 240)
 
                         Spacer()
                     }
                 }
-                .padding(.leading, 30)
+                .padding(.leading, 24)
+                .frame(width: 280)
 
-                // MARK: - Right Content
-                VStack(alignment: .leading, spacing: 42) {
+                // MARK: - Main Content
+                VStack(alignment: .leading, spacing: 50) {
+                    Spacer()
 
-                    // 🟦 Streaks
-                    VStack(alignment: .leading, spacing: 12) {
+                    // === Streaks Section ===
+                    VStack(alignment: .leading, spacing: 20) {
                         Text("Streaks")
-                            .font(.custom("IBMPlexMono-Bold", size: 28))
+                            .font(.custom("IBMPlexMono-Bold", size: 32))
                             .foregroundColor(.black)
 
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "#0DA8E2"))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(.black, lineWidth: 5))
+                        GeometryReader { geo in
+                            let boxSize = geo.size.width / 9
+                            let spacing = geo.size.width / 20
 
-                            HStack(spacing: 104) {
-                                ForEach(1...6, id: \.self) { day in
-                                    VStack(spacing: 6) {
-                                        Text("\(day)")
-                                            .font(.custom("IBMPlexMono-Bold", size: 28))
-                                            .frame(width: 70, height: 80)
-                                            .background(vm.currentStreak >= day ? .black : .clear)
-                                            .foregroundColor(vm.currentStreak >= day ? .white : .black)
-                                            .cornerRadius(10)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color(hex: "#0DA8E2"))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(.black, lineWidth: 4))
 
-                                        Text("Day \(day)")
-                                            .font(.custom("IBMPlexMono-Regular", size: 16))
-                                            .foregroundColor(.black)
+                                HStack(spacing: spacing) {
+                                    ForEach(1...6, id: \.self) { day in
+                                        VStack(spacing: 6) {
+                                            Text("\(day)")
+                                                .font(.custom("IBMPlexMono-Bold", size: boxSize * 0.5))
+                                                .frame(width: boxSize, height: boxSize)
+                                                .background(vm.currentStreak >= day ? Color.black : .clear)
+                                                .foregroundColor(vm.currentStreak >= day ? .white : .black)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(.black, lineWidth: 2)
+                                                )
+                                                .cornerRadius(8)
+
+                                            Text("Day \(day)")
+                                                .font(.custom("IBMPlexMono-Regular", size: 14))
+                                                .foregroundColor(.black)
+                                        }
                                     }
                                 }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 20)
                             }
-                            .padding()
-                        }
-                        .frame(height: 160)
-                    }
-
-                    // 🟦 Badges
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Badges")
-                            .font(.custom("IBMPlexMono-Bold", size: 28))
-                            .foregroundColor(.black)
-
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "#0DA8E2"))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(.black, lineWidth: 5))
-
-                            HStack(alignment: .top, spacing: 90) {
-                                ForEach(vm.achievements) { badge in
-                                    VStack(spacing: 8) {
-                                        Image(badge.iconName)
-                                            .resizable()
-                                            .frame(width: 70, height: 70)
-
-                                        Text(badge.title)
-                                            .font(.custom("IBMPlexMono-Bold", size: 18))
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(.black)
-
-                                        Text(badge.description)
-                                            .font(.custom("IBMPlexMono-Medium", size: 16))
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(.black)
-                                    }
-                                    .frame(width: 160)
-                                }
-                            }
-                            .padding(.vertical)
-                        }
-                        .frame(height: 260)
-                    }
-
-                    // 🟦 Saved Questions
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Leader Board")
-                            .font(.custom("IBMPlexMono-Bold", size: 28))
-                            .foregroundColor(.black)
-
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "#0DA8E2"))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(.black, lineWidth: 5))
                         }
                         .frame(height: 180)
                     }
 
+                    // === Badges Section ===
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Badges")
+                            .font(.custom("IBMPlexMono-Bold", size: 32))
+                            .foregroundColor(.black)
+
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(hex: "#0DA8E2"))
+                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(.black, lineWidth: 4))
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(alignment: .top, spacing: 40) {
+                                    ForEach(vm.achievements) { badge in
+                                        VStack(spacing: 10) {
+                                            Image(badge.iconName)
+                                                .resizable()
+                                                .frame(width: 70, height: 70)
+
+                                            Text(badge.title)
+                                                .font(.custom("IBMPlexMono-Bold", size: 22))
+                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.black)
+
+                                            Text(badge.description)
+                                                .font(.custom("IBMPlexMono-Regular", size: 18))
+                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.black)
+                                                .frame(width: 120)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 32)
+                            }
+                        }
+                        .frame(height: 280)
+                    }
+
                     Spacer()
                 }
-                .padding(.top, 80)
-                .padding(.leading, -30)
-                .padding(.horizontal, 50)
+                .padding(.top, 60)
+                .padding(.trailing, 50)
             }
+            .padding(.horizontal, 20)
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -151,6 +153,8 @@ struct AchievementsView: View {
 
 #Preview {
     @State var isActive = true
-    return AchievementsView(isActive: $isActive, streak: 1) // Example preview streak
+    return AchievementsView(isActive: $isActive, streak: 4)
         .environmentObject(AuthViewModel())
+        .previewDevice("iPad Pro (11-inch)")
+        .previewInterfaceOrientation(.landscapeLeft)
 }

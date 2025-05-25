@@ -58,64 +58,81 @@ struct MultiplayerGameView: View {
 
     // MARK: - Question View
     func gameQuestionView(_ question: MultiplayerQuestion) -> some View {
-        VStack(spacing: 48) {
-            // Question Card
-            ZStack {
-                Image("quizcard")
-                    .resizable()
-                    .frame(width: 620, height: 240)
+        GeometryReader { geometry in
+            let screenWidth = geometry.size.width
+            let cardWidth = screenWidth * 0.65
+            let cardHeight: CGFloat = cardWidth * 0.32
+            let buttonWidth = screenWidth * 0.30
 
-                Text(question.question)
-                    .font(.custom("IBMPlexMono-Bold", size: 22))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 36)
-                    .frame(width: 560, height: 200)
-            }
+            VStack(spacing: 48) {
+                // Question Card
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.black)
+                        .frame(width: cardWidth + 15, height: cardHeight + 20)
 
-            // Answer Buttons Grid
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), spacing: 50),
-                    GridItem(.flexible(), spacing: 50)
-                ],
-                spacing: 24
-            ) {
-                ForEach(question.choices.indices, id: \.self) { index in
-                    let choice = question.choices[index]
+                    Image("quizcard")
+                        .resizable()
+                        .frame(width: cardWidth, height: cardHeight)
 
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.black)
-                            .frame(width: 260, height: 65)
+                    Text(question.question)
+                        .font(.custom("IBMPlexMono-Bold", size: screenWidth > 1024 ? 22 : 20))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 36)
+                        .frame(width: cardWidth * 0.63, height: cardHeight * 0.6)
+                }
+                .frame(height: cardHeight + 20)
 
-                        Button(action: {
-                            selectedAnswer = choice
-                            vm.selectedAnswer = choice
-                            vm.submitAnswer(choice)
-                        }) {
+                // Answer Buttons Grid
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: -360),
+                        GridItem(.flexible(), spacing: -230)
+                    ],
+                    spacing: 24
+                ) {
+                    ForEach(question.choices.indices, id: \.self) { index in
+                        let choice = question.choices[index]
+
+                        ZStack {
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(buttonColor(for: choice))
-                                .frame(width: 255, height: 60)
-                                .overlay(
-                                    Text(choice)
-                                        .font(.custom("IBMPlexMono-Bold", size: 18))
-                                        .foregroundColor(.black)
-                                )
+                                .fill(Color.black)
+                                .frame(width: buttonWidth + 5, height: 80)
+                                .offset(y: 3.5)
+
+                            Button(action: {
+                                selectedAnswer = choice
+                                vm.selectedAnswer = choice
+                                vm.submitAnswer(choice)
+                            }) {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(buttonColor(for: choice))
+                                    .frame(width: buttonWidth, height: 70)
+                                    .overlay(
+                                        Text(choice)
+                                            .font(.custom("IBMPlexMono-Bold", size: 18))
+                                            .foregroundColor(.black)
+                                    )
+                            }
+                            .buttonStyle(NoEffectButtonStyle())
+                            .disabled(vm.hasAnsweredCurrentQuestion)
                         }
-                        .buttonStyle(NoEffectButtonStyle())
-                        .disabled(vm.hasAnsweredCurrentQuestion)
                     }
                 }
             }
-            .padding(.top, 12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal)
+            .padding(.bottom, 40)
+            .padding(.top, 20)
+            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
-        .padding(.bottom, 40)
     }
+
 
     // MARK: - Exit + Avatars + Progress
     private var topBar: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             BackExitButton(icon: "xmark", topPadding: 24, leftPadding: 24, sound: "3") {
                 vm.leaveGame()
                 SocketService.shared.disconnect()
@@ -126,20 +143,28 @@ struct MultiplayerGameView: View {
 
             HStack {
                 Spacer()
-                ForEach(vm.playersInRoom, id: \.self) { playerId in
-                    Image("profileImage 1")
-                        .resizable()
-                        .frame(width: 42, height: 42)
-                        .opacity(vm.answeredPlayers.contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines) == playerId.trimmingCharacters(in: .whitespacesAndNewlines) }) ? 1.0 : 0.4)
-                        .overlay(Circle().stroke(Color.black, lineWidth: 1))
+                
+                VStack{
+                    HStack{
+                        ForEach(vm.playersInRoom, id: \.self) { playerId in
+                            Image("profileImage 1")
+                                .resizable()
+                                .frame(width: 42, height: 44)
+                                .opacity(vm.answeredPlayers.contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines) == playerId.trimmingCharacters(in: .whitespacesAndNewlines) }) ? 1.0 : 0.4)
+                                .overlay(Circle().stroke(Color.black, lineWidth: 1))
+                                
+                        }
+                    }
+                    Text("\(vm.currentIndex) / \(vm.totalQuestions)")
+                        .font(.custom("IBMPlexMono-Bold", size: 22))
+                        .foregroundColor(.black)
+                        .padding(.leading, 12)
+                        .padding(.trailing, 20)
                 }
-                Text("\(vm.currentIndex) / \(vm.totalQuestions)")
-                    .font(.custom("IBMPlexMono-Bold", size: 22))
-                    .foregroundColor(.black)
-                    .padding(.leading, 12)
-                    .padding(.trailing, 20)
+                .padding(.trailing, 42)
+                .offset(y: -18)
             }
-            .padding(.trailing, 42)
+            
         }
     }
 

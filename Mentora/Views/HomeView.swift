@@ -30,11 +30,10 @@ struct HomeView: View {
                 VStack(spacing: 0) {
                     // MARK: - Header
                     HStack {
-                        Text("Welcome friend !")
+                        Text("Welcome \(authVM.user?.displayName ?? "friend") !")
                             .font(.custom("IBMPlexMono-Bold", size: 34))
                             .foregroundColor(.black)
                             .padding(.leading, 40)
-
                         Spacer()
 
                         // Achievements Button

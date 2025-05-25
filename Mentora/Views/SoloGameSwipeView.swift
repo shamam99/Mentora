@@ -18,6 +18,8 @@ struct SoloGameSwipeView: View {
     @State private var fadeOut = false
 
     @State private var cardStack: [SoloGameQuestion] = []
+    @State private var showSwipeHint = true
+
 
     enum SwipeDirection {
         case left, right
@@ -28,7 +30,8 @@ struct SoloGameSwipeView: View {
             Color(hex: "#FEFAED").ignoresSafeArea()
             Image("bg").resizable().scaledToFill().ignoresSafeArea()
 
-            VStack {
+            VStack(spacing: 0) {
+                // Exit Button Top Left
                 HStack {
                     BackExitButton(icon: "xmark", topPadding: 42, leftPadding: 82, sound: "3") {
                         vm.resetGame()
@@ -38,10 +41,21 @@ struct SoloGameSwipeView: View {
                             NavigationUtil.popToRootView()
                         }
                     }
+
                     Spacer()
+
+                    // Question Counter Top Right
+                    VStack(spacing: 0) {
+                        Text("\(vm.currentIndex) / \(vm.total)")
+                            .font(.custom("IBMPlexMono-Bold", size: 22))
+                            .foregroundColor(.black)
+                    }
+                    .padding(.trailing, 62)
+                    .offset(y: 8)
                 }
                 Spacer()
             }
+
 
             if vm.showResult {
                 ZStack {
@@ -100,7 +114,6 @@ struct SoloGameSwipeView: View {
 
                                 Button(action: {
                                     SoundPlayer.shared.playSound(named: "3")
-                                    NavigationUtil.popToRootView()
                                 }) {
                                     RoundedRectangle(cornerRadius: 8)
                                         .fill(Color(hex: "#05D96A"))
@@ -152,24 +165,13 @@ struct SoloGameSwipeView: View {
 
                     Spacer()
 
-                    HStack(spacing: 36) {
+                    HStack(spacing: 180) {
 
                         Image("btnLeft")
                             .resizable()
                             .frame(width: 32, height: 42)
                             .onTapGesture { swipe(.left) }
-
-                        ZStack {
-                            Image("counterBadge")
-                                .resizable()
-                                .frame(width: 70, height: 80)
-                                .padding(.top, 15)
-
-                            Text("\(vm.currentIndex)")
-                                .font(.custom("IBMPlexMono-Bold", size: 20))
-                                .foregroundColor(.black)
-                        }
-                        .padding(.horizontal, 20)
+                        
 
                         Image("btnRight")
                             .resizable()
@@ -180,14 +182,45 @@ struct SoloGameSwipeView: View {
                     .padding(.bottom, 32)
                 }
             }
+            
+            if showSwipeHint {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 32) {
+                            Image(systemName: "arrow.left.and.right")
+                                .font(.system(size: 46, weight: .semibold))
+                                .foregroundColor(.black.opacity(0.6))
+                            Text("Swipe to answer")
+                                .font(.custom("IBMPlexMono-Regular", size: 18))
+                                .foregroundColor(.black.opacity(0.6))
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.5))
+                        .cornerRadius(12)
+                        .shadow(radius: 2)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .transition(.opacity)
+                .padding(.bottom, 20)
+            }
+
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
             cardStack = []
             vm.resetGame()
             vm.startGame()
-        }
 
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                withAnimation {
+                    showSwipeHint = false
+                }
+            }
+        }
         .onChange(of: vm.question) { newQuestion in
             if let q = newQuestion {
                 cardStack.append(q)
@@ -216,12 +249,13 @@ struct SoloGameSwipeView: View {
                 .shadow(radius: 4)
 
             Text(question.text)
-                .font(.custom("IBMPlexMono-Bold", size: 20))
+                .font(.custom("IBMPlexMono-Bold", size: 18))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
-                .frame(width: 250, height: 140)
+                .frame(width: 300, height: 180)
                 .offset(y: 100)
+            
         }
         .frame(width: 520, height: 650)
 
@@ -256,79 +290,11 @@ struct SoloGameSwipeView: View {
 }
 
 
-
 #Preview {
-    ZStack {
-        Color(hex: "#FEFAED").ignoresSafeArea()
-        Image("bg").resizable().scaledToFill().ignoresSafeArea()
-
-        ZStack {
-            // Top decoration corners
-            HStack(spacing: -30) {
-                Image("topCorner")
-                    .resizable()
-                    .frame(width: 480, height: 340)
-                    .offset(x: 245, y: 105)
-                Image("topCorner")
-                    .resizable()
-                    .frame(width: 180, height: 140)
-                    .rotationEffect(.degrees(180))
-                    .offset(x: 5)
-            }
-            .offset(y: -190)
-            
-            // Bottom decoration corners
-            HStack(spacing: -30) {
-                Image("bottomCorner")
-                    .resizable()
-                    .frame(width: 480, height: 340)
-                    .offset(x: -85, y: -105)
-                Image("bottomCorner")
-                    .resizable()
-                    .frame(width: 180, height: 140)
-                    .rotationEffect(.degrees(180))
-                    .offset(x: -450, y:-40)
-            }
-            .offset(y: 190)
-
-            // Middle yellow card
-            ZStack {
-                Image("middleCard")
-                    .resizable()
-                    .frame(width: 640, height: 370)
-
-                VStack(spacing: 32) {
-                    Text("Game Over")
-                        .font(.custom("IBMPlexMono-Bold", size: 32))
-                        .foregroundColor(.black)
-
-                    Text("Great job! You're almost perfect. 🎯")
-                        .font(.custom("IBMPlexMono-Regular", size: 20))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 24)
-
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.black)
-                            .frame(width: 230, height: 52)
-                            .offset(y: 1.5)
-
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(hex: "#05D96A"))
-                            .frame(width: 225, height: 46)
-                            .overlay(
-                                Text("Score: 7/10")
-                                    .font(.custom("IBMPlexMono-Bold", size: 18))
-                                    .foregroundColor(.black)
-                            )
-                    }
-                }
-            }
-
-        }
-    }
+    SoloGameSwipeView(
+        vm: SoloGameViewModel(userId: "previewUser")
+    )
+    .environmentObject(AuthViewModel())
     .previewDevice("iPad Pro (13-inch)")
     .previewInterfaceOrientation(.landscapeLeft)
 }
-

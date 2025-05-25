@@ -28,7 +28,7 @@ struct JoinRoomCodeView: View {
             VStack(spacing: 30) {
                 // Top Back Button
                 HStack {
-                    BackExitButton(icon: "chevron.left", topPadding: 50, leftPadding: 60, sound: "3") {
+                    BackExitButton(icon: "chevron.left", topPadding: 50, leftPadding: 30, sound: "3") {
                         dismiss()
                     }
                 }
@@ -159,7 +159,7 @@ struct JoinRoomCodeView: View {
             }
         }
 
-        socket.on("multiplayerLobbyUpdate") { _, _ in
+        socket.once("multiplayerLobbyUpdate") { [self] data, _ in
             DispatchQueue.main.async {
                 isLoading = false
                 navigateToLobby = true

@@ -35,9 +35,6 @@ struct PDFUploadView: View {
                 presentationMode.wrappedValue.dismiss()
             }
 
-
-            .padding(.leading, 62)
-
             HStack(alignment: .center) {
                 //  Left section
                 ZStack(alignment: .bottomLeading) {
