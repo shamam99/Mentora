@@ -140,7 +140,6 @@ struct MultiplayerGameView: View {
                     NavigationUtil.popToRootView()
                 }
             }
-
             HStack {
                 Spacer()
                 

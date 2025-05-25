@@ -17,6 +17,8 @@ struct MultiplayerLobbyView: View {
     let userId: String
     let displayName: String
     let pinCode: String?
+    
+
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -107,41 +109,52 @@ struct MultiplayerLobbyView: View {
 
 struct PuzzleGridView: View {
     let players: [String]
-    private let playerImages = ["slot1", "slot2", "slot3", "slot4"]
+
+    struct SlotData: Identifiable {
+        let id = UUID()
+        let imageName: String
+        let size: CGFloat
+        let xOffset: CGFloat
+        let yOffset: CGFloat
+    }
+
+    private let slots: [SlotData] = [
+        SlotData(imageName: "slot1", size: 400, xOffset: -180, yOffset: -165),
+        SlotData(imageName: "slot2", size: 405, xOffset: 160, yOffset: -150),
+        SlotData(imageName: "slot3", size: 350, xOffset: -145, yOffset: 120),
+        SlotData(imageName: "slot4", size: 380, xOffset: 130, yOffset: 150)
+    ]
 
     var body: some View {
-        GeometryReader { geometry in
-            let screenHeight = geometry.size.height
-            let pieceSize: CGFloat = min(screenHeight * 0.53, 350)
-
-            VStack(spacing: -pieceSize * 0.25) {
-                HStack(spacing: -pieceSize * 0.06) {
-                    playerSlot(index: 0, pieceSize: pieceSize)
-                    playerSlot(index: 1, pieceSize: pieceSize)
-                }
-
-                HStack(spacing: -pieceSize * 0.30) {
-                    playerSlot(index: 2, pieceSize: pieceSize)
-                    playerSlot(index: 3, pieceSize: pieceSize)
+        ZStack {
+            ForEach(slots.indices, id: \.self) { index in
+                if let slot = slots[safe: index] {
+                    playerSlot(index: index, slot: slot)
+                        .offset(x: slot.xOffset, y: slot.yOffset)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(height: 700) // You can tweak this if needed
+        .frame(height: 700)
     }
 
-    func playerSlot(index: Int, pieceSize: CGFloat) -> some View {
+    func playerSlot(index: Int, slot: SlotData) -> some View {
         let playerJoined = index < players.count
-        let pieceImage = playerImages[index]
 
-        return ZStack {
-            Image(pieceImage)
-                .resizable()
-                .frame(width: pieceSize, height: pieceSize)
-                .opacity(playerJoined ? 1.0 : 0.3)
-        }
+        return Image(slot.imageName)
+            .resizable()
+            .frame(width: slot.size, height: slot.size)
+            .opacity(playerJoined ? 1.0 : 0.3)
     }
 }
+
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}
+
+
+
 
 #Preview {
     MultiplayerLobbyView(
